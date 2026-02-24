@@ -30,7 +30,7 @@ import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
 
 
-type RegistrationFormValues = z.infer<typeof registrationSchema>;
+type RegistrationFormValues = z.input<typeof registrationSchema>;
 
 const eventInfo = [
     { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
@@ -69,7 +69,7 @@ export function Registration() {
     { value: 'Amigo', label: 'Sou um(a) amigo(a)' },
   ];
 
-  async function onSubmit(data: RegistrationFormValues) {
+  async function onSubmit(data: z.output<typeof registrationSchema>) {
     setIsSubmitting(true);
 
     if (!firestore) {
