@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Logo } from "@/components/logo";
-import { ArrowDown } from "lucide-react";
 
 export function Hero() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
@@ -36,10 +35,6 @@ export function Hero() {
             <Link href="/inscricao">FAZER INSCRIÇÃO AGORA</Link>
           </Button>
         </div>
-         <a href="#info" className="absolute bottom-8 animate-bounce">
-            <ArrowDown className="h-8 w-8" />
-            <span className="sr-only">Rolar para detalhes</span>
-        </a>
       </div>
     </section>
   );
