@@ -24,9 +24,7 @@ export function Hero() {
       </div>
       <div className="relative z-10 container mx-auto px-4 md:px-6 text-center text-foreground space-y-8">
         <div className="flex justify-center">
-           <div className="bg-background/80 backdrop-blur-sm p-6 rounded-lg">
-             <Logo className="h-20 w-auto" />
-           </div>
+           <Logo className="h-40 w-auto" />
         </div>
         <div className="flex justify-center">
           <Button asChild size="lg" className="text-lg px-10 py-6">
