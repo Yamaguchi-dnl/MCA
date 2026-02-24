@@ -22,12 +22,12 @@ export function Hero() {
         )}
         <div className="absolute inset-0 bg-black/50" />
       </div>
-      <div className="relative z-10 container mx-auto px-4 md:px-6 text-center text-foreground space-y-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-6 text-center text-foreground space-y-4">
         <div className="flex justify-center">
            <Logo className="h-80 w-auto" />
         </div>
         <div className="flex justify-center">
-          <Button asChild size="lg" className="text-lg px-10 py-6">
+          <Button asChild size="lg" className="text-lg px-10 py-6 rounded-full">
             <Link href="/inscricao">FAZER INSCRIÇÃO</Link>
           </Button>
         </div>
