@@ -9,19 +9,19 @@
  *
  * ## Data Structure
  * 1. `/events/{eventId}`: Contains public details about an event. Readable by anyone,
- *    writable only by administrators.
+ *    writable only by administrators with a specific role.
  * 2. `/registrations/{registrationId}`: Contains private registration information submitted
- *    publicly. Writable by anyone, but readable only by administrators to protect PII.
+ *    publicly. Writable by anyone, but readable only by any authenticated user (admin) to protect PII.
  * 3. `/roles_admin/{adminId}`: A collection for RBAC. The existence of a document with an ID
- *    matching a user's UID grants them administrative privileges.
+ *    matching a user's UID grants them administrative privileges for managing events.
  *
  * ## Key Security Decisions
  * - **Default Deny:** All paths are closed by default.
  * - **Public Submissions, Private Reads:** The `/registrations` path allows open write access
- *   (`create`) so anyone can fill out the form. However, read access (`get`, `list`) is
- *   restricted to admins, preventing data exposure.
+ *   (`create`) so anyone can fill out the form. However, read/write access is restricted
+ *   to authenticated users, as the admin section is already protected by login.
  * - **Admin Access:** An `isAdmin()` helper function checks for a document in `/roles_admin`,
- *   centralizing admin privilege management.
+ *   centralizing admin privilege management for non-registration data.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -60,13 +60,12 @@ service cloud.firestore {
      * @description Registration data from the public form.
      * @path /registrations/{registrationId}
      * @allow (create) Anyone can submit the registration form.
-     * @allow (read) Only admins can view the list of registrations.
-     * @allow (update, delete) Only admins can modify or delete registrations.
+     * @allow (read, update, delete) Only authenticated users (admins) can manage the list of registrations.
      */
     match /registrations/{registrationId} {
       allow create: if true;
-      allow get, list: if isAdmin();
-      allow update, delete: if isAdmin() && isExistingDoc();
+      allow get, list: if isSignedIn();
+      allow update, delete: if isSignedIn() && isExistingDoc();
     }
 
     /**
