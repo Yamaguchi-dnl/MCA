@@ -115,7 +115,7 @@ export function Registration() {
 
   return (
     <div className="flex flex-col items-center w-full max-w-3xl px-4">
-        <Logo className="h-40 w-auto mb-8" />
+        <Logo className="h-60 w-auto mb-8" />
         <Card className="w-full shadow-xl">
            <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold tracking-tight">Sábado Total - Na trilha da Fé</CardTitle>
