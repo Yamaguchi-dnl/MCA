@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DietarySummary } from "./dietary-summary";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
@@ -69,7 +68,6 @@ export function DashboardClient() {
             </div>
           </CardContent>
         </Card>
-        <DietarySummary registrations={registrations} />
       </div>
       <Card className="animate-in fade-in-50 delay-200 duration-500">
         <CardHeader>
