@@ -3,11 +3,11 @@ import { Particles } from "@/components/particles";
 
 export default function InscricaoPage() {
   return (
-    <>
+    <div className="bg-background">
       <Particles />
-      <div className="flex flex-col min-h-[100dvh] items-center py-8 sm:py-12 px-4 relative z-10">
+      <div className="flex flex-col min-h-[100dvh] items-center py-2 px-4 relative z-10">
         <Registration />
       </div>
-    </>
+    </div>
   );
 }

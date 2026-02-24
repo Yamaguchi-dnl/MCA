@@ -16,7 +16,7 @@ export function Particles() {
   const animationFrameId = useRef<number>();
 
   const init = () => {
-    if (initialized.current || !window.particlesJS || !window.Stats) {
+    if (initialized.current || !window.particlesJS) {
       return;
     }
     initialized.current = true;
@@ -24,7 +24,7 @@ export function Particles() {
     window.particlesJS("particles-js", {
       particles: {
         number: { value: 80, density: { enable: true, value_area: 800 } },
-        color: { value: "#ff0000" },
+        color: { value: ["#F9A825", "#2196F3", "#4CAF50", "#FF5252", "#9C27B0", "#E91E63"] },
         shape: {
           type: "circle",
           stroke: { width: 0, color: "#000000" },
@@ -82,43 +82,11 @@ export function Particles() {
       },
       retina_detect: true,
     });
-
-    const stats = new window.Stats();
-    stats.setMode(0);
-    stats.domElement.style.position = "absolute";
-    stats.domElement.style.left = "5px";
-    stats.domElement.style.top = "5px";
-    stats.domElement.id = "stats-widget";
-    document.body.appendChild(stats.domElement);
-
-    const count_particles = document.querySelector(".js-count-particles");
-    const update = function () {
-      stats.begin();
-      stats.end();
-      if (
-        window.pJSDom &&
-        window.pJSDom[0]?.pJS?.particles?.array &&
-        count_particles
-      ) {
-        (
-          count_particles as HTMLElement
-        ).innerText = window.pJSDom[0].pJS.particles.array.length.toString();
-      }
-      animationFrameId.current = requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
   };
 
   useEffect(() => {
     // Cleanup
     return () => {
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-      const statsWidget = document.getElementById("stats-widget");
-      if (statsWidget) {
-        statsWidget.remove();
-      }
       if (window.pJSDom && window.pJSDom.length > 0 && window.pJSDom[0].pJS) {
         window.pJSDom[0].pJS.fn.vendors.destroypJS();
         window.pJSDom = [];
@@ -141,55 +109,21 @@ export function Particles() {
           top: 0;
           left: 0;
           z-index: 0;
-          background-color: #b61924;
+          background-color: #ffffff;
           background-image: url("");
           background-repeat: no-repeat;
           background-size: cover;
           background-position: 50% 50%;
         }
-        .count-particles {
-          background: #000022;
-          position: absolute;
-          top: 53px;
-          left: 5px;
-          width: 80px;
-          color: #13e8e9;
-          font-size: 0.8em;
-          text-align: left;
-          text-indent: 4px;
-          line-height: 14px;
-          padding-bottom: 2px;
-          font-family: Helvetica, Arial, sans-serif;
-          font-weight: bold;
-          border-radius: 0 0 3px 3px;
-          user-select: none;
-          z-index: 1;
-        }
-        .js-count-particles {
-          font-size: 1.1em;
-        }
-        #stats-widget {
-          user-select: none;
-          margin-top: 5px;
-          margin-left: 5px;
-          border-radius: 3px 3px 0 0;
-          overflow: hidden;
-          z-index: 1;
+        .count-particles, #stats-widget {
+          display: none;
         }
       `}</style>
       <div id="particles-js"></div>
-      <div className="count-particles">
-        <span className="js-count-particles">--</span> particles
-      </div>
 
       <Script
         id="particles-js-lib"
         src="http://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"
-        onLoad={init}
-      />
-      <Script
-        id="stats-js-lib"
-        src="http://threejs.org/examples/js/libs/stats.min.js"
         onLoad={init}
       />
     </>
