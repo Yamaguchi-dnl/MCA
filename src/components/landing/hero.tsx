@@ -24,9 +24,6 @@ export function Hero() {
       </div>
       <div className="relative z-10 container mx-auto px-4 md:px-6 text-white flex flex-col items-center">
         <Logo className="h-40 w-auto" />
-        <p className="max-w-2xl mx-auto mt-4 md:text-xl text-lg font-light" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.7)' }}>
-          Um dia inesquecível de diversão, aprendizado e amizade para crianças e adolescentes.
-        </p>
         <div className="flex justify-center mt-8">
           <Button asChild size="lg" className="text-lg px-10 py-7 rounded-full font-bold shadow-lg transform transition-transform hover:scale-105">
             <Link href="/inscricao">FAZER INSCRIÇÃO AGORA</Link>
