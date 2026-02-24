@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -24,7 +25,7 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
+import { IMaskInput } from "react-imask";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -47,6 +48,7 @@ export function Registration() {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       childName: "",
+      birthDate: "",
       guardianName: "",
       guardianWhatsapp: "",
       hasDietaryRestriction: "nao",
@@ -117,7 +119,7 @@ export function Registration() {
     <div className="w-full max-w-3xl space-y-10">
         <div className="text-center">
             <Link href="/" aria-label="Voltar para a página inicial">
-                <Logo className="h-28 w-auto mx-auto" />
+                <Logo className="h-32 w-auto mx-auto -mb-8" />
             </Link>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-4">Ficha de Inscrição</h1>
             <p className="mt-2 text-lg text-muted-foreground">
@@ -168,7 +170,17 @@ export function Registration() {
                     render={({ field }) => (
                     <FormItem className="flex flex-col">
                         <FormLabel>Data de Nascimento</FormLabel>
-                        <DatePicker field={field} />
+                        <FormControl>
+                          <IMaskInput
+                            mask="00/00/0000"
+                            placeholder="DD/MM/AAAA"
+                            value={field.value || ""}
+                            onAccept={(value: any) => {
+                              field.onChange(value);
+                            }}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                          />
+                        </FormControl>
                         <FormMessage />
                     </FormItem>
                     )}

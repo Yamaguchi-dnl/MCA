@@ -1,15 +1,26 @@
 import { z } from "zod";
-import { subYears, isAfter, isBefore } from "date-fns";
+import { subYears, isAfter, isBefore, parse, isValid } from "date-fns";
 
 const today = new Date();
-const minAgeDate = subYears(today, 18); // Must be born after this date (not yet 18)
-const maxAgeDate = subYears(today, 2);  // Must be born before this date (at least 2)
+today.setHours(0, 0, 0, 0);
+
+const minAgeDate = subYears(today, 18);
+const maxAgeDate = subYears(today, 2);
 
 export const registrationSchema = z.object({
   childName: z.string().min(3, { message: "O nome completo da criança é obrigatório." }),
-  birthDate: z.date({ required_error: "A data de nascimento é obrigatória." })
-    .refine(date => isAfter(date, minAgeDate), { message: "A idade máxima é 17 anos." })
-    .refine(date => isBefore(date, maxAgeDate), { message: "A idade mínima é 2 anos." }),
+  birthDate: z.string()
+    .min(10, { message: "A data de nascimento é obrigatória e deve estar no formato DD/MM/AAAA." })
+    .refine(val => {
+        const parsedDate = parse(val, 'dd/MM/yyyy', new Date());
+        // check if date is valid and year is reasonable
+        return isValid(parsedDate) && parsedDate.getFullYear() > 1900;
+    }, {
+        message: "Data de nascimento inválida."
+    })
+    .transform(val => parse(val, 'dd/MM/yyyy', new Date()))
+    .refine(date => isAfter(date, minAgeDate), { message: `A idade máxima é 17 anos.` })
+    .refine(date => isBefore(date, maxAgeDate), { message: `A idade mínima é 2 anos.` }),
   guardianName: z.string().min(3, { message: "O nome completo do responsável é obrigatório." }),
   guardianWhatsapp: z.string().min(10, { message: "O telefone (WhatsApp) do responsável é obrigatório." }),
   hasDietaryRestriction: z.enum(["sim", "nao"], {
