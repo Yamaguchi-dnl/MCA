@@ -27,7 +27,7 @@ import { IMaskInput } from "react-imask";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useFirestore } from "@/firebase";
-import { collection, query, where, getDocs, Timestamp, addDoc } from "firebase/firestore";
+import { collection, Timestamp, addDoc } from "firebase/firestore";
 import { parse } from "date-fns";
 
 
@@ -95,18 +95,6 @@ export function Registration() {
       };
       
       const registrationsRef = collection(firestore, "registrations");
-      const q = query(registrationsRef, where("childName", "==", registrationData.childName));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        toast({
-          variant: "destructive",
-          title: "Erro na Inscrição",
-          description: "Esta criança já foi inscrita anteriormente.",
-        });
-        setIsSubmitting(false);
-        return;
-      }
       
       await addDoc(registrationsRef, registrationData);
 
