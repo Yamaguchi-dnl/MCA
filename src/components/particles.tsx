@@ -22,7 +22,7 @@ export function Particles() {
 
     window.particlesJS("particles-js", {
       particles: {
-        number: { value: 80, density: { enable: true, value_area: 800 } },
+        number: { value: 40, density: { enable: true, value_area: 800 } },
         color: { value: ["#F9A825", "#2196F3", "#4CAF50", "#FF5252", "#9C27B0", "#E91E63"] },
         shape: {
           type: "circle",
