@@ -21,8 +21,7 @@
         },
         "time": {
           "type": "string",
-          "description": "The start time of the event.",
-          "format": "time"
+          "description": "The start time of the event."
         },
         "location": {
           "type": "string",
@@ -67,20 +66,20 @@
           "type": "string",
           "description": "Unique identifier for the Registration entity."
         },
-        "childFullName": {
+        "childName": {
           "type": "string",
           "description": "The full legal name of the child being registered for the event."
         },
-        "childDateOfBirth": {
+        "birthDate": {
           "type": "string",
           "description": "The child's date of birth, used for age verification (2-17 years).",
           "format": "date"
         },
-        "childAgeGroup": {
+        "ageGroup": {
           "type": "string",
           "description": "The age group or class selected for the child (e.g., Maternal, Jardim)."
         },
-        "guardianFullName": {
+        "guardianName": {
           "type": "string",
           "description": "The full legal name of the responsible adult or guardian registering the child."
         },
@@ -88,97 +87,55 @@
           "type": "string",
           "description": "The WhatsApp phone number of the guardian for urgent communications and event updates."
         },
-        "hasDietaryRestrictions": {
-          "type": "boolean",
-          "description": "A flag indicating whether the child has any specific dietary restrictions."
-        },
-        "dietaryRestrictions": {
+        "hasDietaryRestriction": {
           "type": "string",
-          "description": "Detailed description of the child's specific dietary restrictions, if 'hasDietaryRestrictions' is true."
+          "description": "A flag indicating whether the child has any specific dietary restrictions (sim/nao)."
         },
-        "eventInformationConsent": {
-          "type": "boolean",
-          "description": "Indicates if the guardian has provided consent after reviewing event information."
+        "dietaryRestrictionDetails": {
+          "type": "string",
+          "description": "Detailed description of the child's specific dietary restrictions, if 'hasDietaryRestriction' is 'sim'."
         },
-        "ageSpecificSupervisionConsent": {
-          "type": "boolean",
-          "description": "Indicates if the guardian has provided consent for age-specific supervision requirements."
-        },
-        "submissionDateTime": {
+        "submissionDate": {
           "type": "string",
           "description": "The date and time when the registration form was successfully submitted.",
           "format": "date-time"
         },
         "status": {
           "type": "string",
-          "description": "The current processing status of the registration (e.g., 'pending', 'approved', 'declined')."
-        },
-        "eventId": {
-          "type": "string",
-          "description": "Reference to the Event entity this registration is associated with. (Relationship: Event 1:N Registration)"
+          "description": "The current processing status of the registration (e.g., 'pending', 'confirmado', 'cancelado')."
         }
       },
       "required": [
-        "id",
-        "childFullName",
-        "childDateOfBirth",
-        "childAgeGroup",
-        "guardianFullName",
+        "childName",
+        "birthDate",
+        "ageGroup",
+        "guardianName",
         "guardianWhatsapp",
-        "hasDietaryRestrictions",
-        "eventInformationConsent",
-        "ageSpecificSupervisionConsent",
-        "submissionDateTime",
-        "status",
-        "eventId"
+        "hasDietaryRestriction",
+        "submissionDate",
+        "status"
       ]
     }
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "google.com"
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/events/{eventId}",
-        "definition": {
-          "entityName": "Event",
-          "schema": {
-            "$ref": "#/backend/entities/Event"
-          },
-          "description": "Stores fixed details and configuration for specific events (e.g., 'sabadototalmca'). This collection is publicly readable by all users. Administrative users have privileges to create and update these documents.",
-          "params": [
-            {
-              "name": "eventId",
-              "description": "The unique identifier for a specific event (e.g., 'sabadototalmca')."
-            }
-          ]
-        }
+    "collections": {
+      "events": {
+        "schema": {
+          "$ref": "#/entities/Event"
+        },
+        "description": "Stores fixed details and configuration for specific events (e.g., 'sabadototalmca'). This collection is publicly readable by all users. Administrative users have privileges to create and update these documents."
       },
-      {
-        "path": "/users/{userId}/registrations/{registrationId}",
-        "definition": {
-          "entityName": "Registration",
-          "schema": {
-            "$ref": "#/backend/entities/Registration"
-          },
-          "description": "Stores child and guardian registration details, with ownership defined by the path. The `userId` in the path corresponds to the Firebase Auth UID of the guardian who created the registration, ensuring authorization independence. Each document also includes an `eventId` to link it to the specific event.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The Firebase Auth UID of the guardian who owns this registration."
-            },
-            {
-              "name": "registrationId",
-              "description": "The unique identifier for this specific child's registration."
-            }
-          ]
-        }
+      "registrations": {
+        "schema": {
+          "$ref": "#/entities/Registration"
+        },
+        "description": "Stores child and guardian registration details submitted via the public form. This collection is writable by anyone but only readable by authenticated administrators."
       }
-    ],
-    "reasoning": "The recommended Firestore structure is designed following the core principles of Authorization Independence, Structural Segregation, and clear Access Modeling to ensure robust security, scalability, and debuggability. \n\n**Authorization Independence:**\n*   For `Event` data, the event details are publicly accessible, so no complex authorization dependencies are required for reads by general users. Administrative write access is handled through a separate, top-level roles collection, preventing `get()` calls on the `Event` document for authorization. \n*   For `Registration` data, authorization independence is critically achieved through **path-based ownership**. Each registration document is nested under the specific user's path: `/users/{userId}/registrations/{registrationId}`. Here, the `{userId}` wildcard directly corresponds to `request.auth.uid` of the guardian. This structure intrinsically links ownership to the document's path, eliminating the need to denormalize a `guardianId` field into the `Registration` document itself or perform `get()` calls to a parent user document to determine ownership. Rules can directly compare `request.auth.uid` with the `userId` in the path.\n\n**QAPs (Rules are not Filters):**\n*   **`/events/{eventId}`:** This collection is designed for public read access, with specific admin privileges for write operations. The security rule for reads will simply be `allow read: true;`, which naturally supports QAPs as no filtering is expected or required for public display. Admin write access will be guarded by checking the existence of an admin role document.\n*   **`/users/{userId}/registrations/{registrationId}`:** \n    *   **For Guardians:** The path-based ownership enforces a clear security posture. A guardian attempting to access their registrations will query `db.collection('users').doc(request.auth.uid).collection('registrations')`. The security rule will explicitly check `allow read, write: if request.auth.uid == userId;`, where `userId` is the path segment. This rule mandates that any list operation by a guardian must implicitly (through the query path) include a filter for their own UID, thus adhering strictly to QAPs. \n    *   **For Admins:** Admins require the ability to view all registrations for the dashboard and AI summary tool. This is supported by using **Collection Group Queries** on the `registrations` subcollection. The security rules for admin access will check for the existence of an admin role document (e.g., `exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))`). If an admin role is confirmed, they will be granted read access to all documents within the `registrations` collection group, allowing the necessary 'list all' functionality without requiring `where` clauses from the client, perfectly aligning with QAPs.\n\n**Structural Segregation:**\n*   `events` collection holds public, static event configuration. \n*   `users/{userId}/registrations` subcollections hold private, user-specific registration data. This segregation ensures that different security postures (public vs. private, guardian-owned) are handled by distinct data locations.\n*   Administrative roles are managed in a dedicated top-level collection (`/roles_admin/{adminId}`), separate from application data, ensuring a clean separation of concerns.\n\n**Access Modeling:**\n*   Path-Based Ownership: `registrations` explicitly follows the pattern of `/users/{userId}/data` for private, user-owned information.\n*   Global Roles (DBAC): A dedicated collection `/roles_admin/{adminId}` is used for granting administrative access, relying on the existence of a document for authorization.\n\n**Data Clarity and Predictability:**\n*   The `Registration` entity includes a `status` field for explicit state modeling. \n*   Path wildcards (`{eventId}`, `{userId}`, `{registrationId}`) are semantically named for clarity."
+    }
   }
 }

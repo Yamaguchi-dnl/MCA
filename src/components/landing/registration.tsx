@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { registerChild } from "@/lib/actions";
 import { registrationSchema } from "@/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IMaskInput } from "react-imask";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
 
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
@@ -42,6 +43,7 @@ export function Registration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
@@ -67,28 +69,61 @@ export function Registration() {
     { value: 'Amigo', label: 'Sou um(a) amigo(a)' },
   ];
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: RegistrationFormValues) {
     setIsSubmitting(true);
+
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Conexão",
+        description: "Não foi possível conectar ao banco de dados. Tente novamente.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const result = await registerChild(data);
-      if (result.success) {
-        setIsSuccess(true);
-        window.scrollTo(0, 0);
-      } else {
+      const { birthDate, ...restData } = data;
+
+      const registrationData = {
+        ...restData,
+        birthDate: Timestamp.fromDate(birthDate),
+        status: 'confirmado',
+        submissionDate: Timestamp.now(),
+      };
+      
+      const registrationsRef = collection(firestore, "registrations");
+      const q = query(registrationsRef, where("childName", "==", registrationData.childName));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
         toast({
           variant: "destructive",
           title: "Erro na Inscrição",
-          description: result.error || "Ocorreu um erro. Tente novamente.",
+          description: "Esta criança já foi inscrita anteriormente.",
         });
+        setIsSubmitting(false);
+        return;
       }
+      
+      // Use non-blocking write
+      addDocumentNonBlocking(registrationsRef, registrationData);
+
+      setIsSuccess(true);
+      window.scrollTo(0, 0);
+
     } catch (error) {
+      console.error("Error during registration:", error);
       toast({
         variant: "destructive",
         title: "Erro Inesperado",
         description: "Não foi possível completar a inscrição. Por favor, tente mais tarde.",
       });
     } finally {
-      setIsSubmitting(false);
+      // isSubmitting is set to false only on error, success leads to a new screen.
+      if (!isSuccess) {
+          setIsSubmitting(false);
+      }
     }
   }
 

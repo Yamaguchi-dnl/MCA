@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Registration } from "@/types";
-import { getDietarySummary } from "@/lib/actions";
+import { summarizeDietaryRestrictions } from "@/ai/flows/summarize-dietary-restrictions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,22 +36,18 @@ export function DietarySummary({ registrations }: DietarySummaryProps) {
       .map((reg) => reg.dietaryRestrictionDetails as string);
 
     try {
-      const result = await getDietarySummary(restrictions);
-      if (result.success) {
-        setSummary(result.summary || "Nenhuma informação para resumir.");
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erro ao Gerar Resumo",
-          description: result.error,
-        });
-        setIsOpen(false);
-      }
+        if (restrictions.length === 0) {
+            setSummary("Nenhuma restrição alimentar foi informada pelos participantes.");
+        } else {
+            const result = await summarizeDietaryRestrictions({ restrictions });
+            setSummary(result.summary);
+        }
     } catch (error) {
+      console.error("Error summarizing dietary restrictions:", error);
       toast({
         variant: "destructive",
         title: "Erro Inesperado",
-        description: "Não foi possível gerar o resumo.",
+        description: "Não foi possível gerar o resumo de IA.",
       });
       setIsOpen(false);
     } finally {
@@ -69,7 +65,7 @@ export function DietarySummary({ registrations }: DietarySummaryProps) {
             <CardTitle className="text-4xl">{restrictionCount}</CardTitle>
         </CardHeader>
         <CardContent>
-            <Button size="sm" onClick={handleSummarize} disabled={isLoading}>
+            <Button size="sm" onClick={handleSummarize} disabled={isLoading || registrations.length === 0}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Gerar Resumo
             </Button>

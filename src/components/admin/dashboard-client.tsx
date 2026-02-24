@@ -8,33 +8,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { DietarySummary } from "./dietary-summary";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useCollection } from 'react-firebase-hooks/firestore';
-import { collection, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
+  const firestore = useFirestore();
 
-  const [value, loading, error] = useCollection(
-    query(collection(db, 'inscricoes'), orderBy('submissionDate', 'desc'))
-  );
+  const registrationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'registrations'), orderBy('submissionDate', 'desc'));
+  }, [firestore]);
+
+  const { data: snapshot, isLoading: loading, error } = useCollection(registrationsQuery);
 
   const registrations: Registration[] = useMemo(() => {
-    if (!value) return [];
-    return value.docs.map(doc => {
-      const data = doc.data();
+    if (!snapshot) return [];
+    return snapshot.map(doc => {
+      const data = doc as Omit<Registration, 'id'>;
       return {
-        id: doc.id,
         ...data,
-        birthDate: data.birthDate.toDate(),
-        submissionDate: data.submissionDate.toDate(),
-      } as Registration;
+        id: doc.id,
+        birthDate: data.birthDate instanceof Timestamp ? data.birthDate.toDate() : new Date(data.birthDate),
+        submissionDate: data.submissionDate instanceof Timestamp ? data.submissionDate.toDate() : new Date(data.submissionDate),
+      };
     });
-  }, [value]);
+  }, [snapshot]);
 
   const filteredRegistrations = useMemo(() => {
-    if (!registrations) return [];
     return registrations.filter(
       (reg) =>
         reg.childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,15 +44,15 @@ export function DashboardClient() {
     );
   }, [searchTerm, registrations]);
 
-  const getAge = (birthDate: Registration['birthDate']) => {
-    const dob = typeof birthDate === 'string' ? new Date(birthDate) : birthDate instanceof Date ? birthDate : new Date(birthDate.seconds * 1000);
-    const diff = Date.now() - dob.getTime();
+  const getAge = (birthDate: Date) => {
+    const diff = Date.now() - birthDate.getTime();
     const ageDate = new Date(diff);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
   if (error) {
-    return <p className="text-red-500 text-center">Erro ao carregar as inscrições. Por favor, verifique o console.</p>;
+    console.error("Firestore error:", error);
+    return <p className="text-red-500 text-center">Erro ao carregar as inscrições. Por favor, tente recarregar a página.</p>;
   }
 
   return (
@@ -113,7 +115,7 @@ export function DashboardClient() {
                       <TableCell>
                         <div className="font-medium">{reg.childName}</div>
                         <div className="hidden text-sm text-muted-foreground md:inline">
-                          {getAge(reg.birthDate)} anos
+                          {getAge(reg.birthDate as Date)} anos
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
@@ -134,7 +136,7 @@ export function DashboardClient() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      Nenhum resultado encontrado.
+                      Nenhuma inscrição encontrada.
                     </TableCell>
                   </TableRow>
                 )}

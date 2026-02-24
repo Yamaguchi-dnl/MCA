@@ -1,21 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { useUser, useAuth } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
-  const [user, loading] = useAuthState(auth);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const router = useRouter();
 
-  if (loading) {
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.replace("/admin");
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -23,12 +29,8 @@ export default function LoginPage() {
     );
   }
 
-  if (user) {
-    router.replace("/admin");
-    return null;
-  }
-
   const handleGoogleSignIn = async () => {
+    if (!auth) return;
     setIsSigningIn(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -62,7 +64,7 @@ export default function LoginPage() {
         <CardContent>
           <Button
             onClick={handleGoogleSignIn}
-            disabled={isSigningIn}
+            disabled={isSigningIn || !auth}
             className="w-full"
             variant="outline"
           >
