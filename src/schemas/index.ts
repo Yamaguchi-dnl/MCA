@@ -6,24 +6,29 @@ const minAgeDate = subYears(today, 18); // Must be born after this date (not yet
 const maxAgeDate = subYears(today, 2);  // Must be born before this date (at least 2)
 
 export const registrationSchema = z.object({
-  childName: z.string().min(3, { message: "O nome completo é obrigatório." }),
+  childName: z.string().min(3, { message: "O nome completo da criança é obrigatório." }),
   birthDate: z.date({ required_error: "A data de nascimento é obrigatória." })
     .refine(date => isAfter(date, minAgeDate), { message: "A idade máxima é 17 anos." })
     .refine(date => isBefore(date, maxAgeDate), { message: "A idade mínima é 2 anos." }),
-  ageGroup: z.string({ required_error: "Selecione uma turma." }),
-  guardianName: z.string().min(3, { message: "O nome do responsável é obrigatório." }),
-  guardianWhatsapp: z.string().regex(/^\(\d{2}\)\s\d{5}-\d{4}$/, { message: "Formato de WhatsApp inválido. Use (99) 99999-9999." }),
-  hasDietaryRestriction: z.enum(["sim", "nao"]),
-  dietaryRestrictionDetails: z.string().optional(),
-  consentInfo: z.literal(true, {
-    errorMap: () => ({ message: "Você deve estar ciente das informações." }),
+  guardianName: z.string().min(3, { message: "O nome completo do responsável é obrigatório." }),
+  guardianWhatsapp: z.string().min(10, { message: "O telefone (WhatsApp) do responsável é obrigatório." }),
+  hasDietaryRestriction: z.enum(["sim", "nao"], {
+    required_error: "Informe se a criança tem alguma restrição alimentar.",
   }),
-  consentSupervision: z.literal(true, {
-    errorMap: () => ({ message: "Você deve concordar com o termo de supervisão." }),
+  dietaryRestrictionDetails: z.string().optional(),
+  ageGroup: z.enum([
+    'Maternal', 
+    'Jardim', 
+    'Primários', 
+    'Juniores', 
+    'Adolescentes I', 
+    'Adolescentes II'
+  ], {
+    required_error: "Selecione a turma da criança.",
   }),
 }).refine(data => {
     if (data.hasDietaryRestriction === 'sim') {
-        return data.dietaryRestrictionDetails && data.dietaryRestrictionDetails.length > 0;
+        return data.dietaryRestrictionDetails && data.dietaryRestrictionDetails.trim().length > 0;
     }
     return true;
 }, {

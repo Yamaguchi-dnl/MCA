@@ -18,19 +18,23 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, PartyPopper, CalendarDays, MapPin, DollarSign, Users, Mail, Bus } from "lucide-react";
+import { Loader2, PartyPopper, CalendarDays, MapPin, DollarSign, Users, Info } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 const eventInfo = [
-    { icon: CalendarDays, label: 'Horário', value: 'A ser definido. Fique atento!' },
-    { icon: MapPin, label: 'Local', value: 'Dependências da Igreja Presbiteriana da Alvorada.' },
-    { icon: DollarSign, label: 'Valor', value: 'Gratuito. Traga apenas sua alegria!' },
-    { icon: Bus, label: 'Transporte', value: 'Não incluso.' },
-    { icon: Users, label: 'Faixa Etária', value: 'Crianças de 2 a 17 anos.' },
-    { icon: Mail, label: 'Contato', value: 'contato@mca.com' }
+    { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
+    { icon: MapPin, label: 'Local', value: 'Igreja Adventista da Promessa da Barreirinha - Rua Flávio Dallegrave, 9745' },
+    { icon: DollarSign, label: 'Valor', value: 'Gratuito' },
+    { icon: Users, label: 'Faixa Etária', value: '2-17 anos' }
 ];
 
 export function Registration() {
@@ -46,12 +50,18 @@ export function Registration() {
       guardianWhatsapp: "",
       hasDietaryRestriction: "nao",
       dietaryRestrictionDetails: "",
-      consentInfo: false,
-      consentSupervision: false,
     },
   });
   
   const hasRestriction = form.watch("hasDietaryRestriction");
+  const ageGroupOptions = [
+    'Maternal', 
+    'Jardim', 
+    'Primários', 
+    'Juniores', 
+    'Adolescentes I', 
+    'Adolescentes II'
+  ];
 
   async function onSubmit(data: any) {
     setIsSubmitting(true);
@@ -108,7 +118,7 @@ export function Registration() {
         <Logo className="h-40 w-auto mb-8" />
         <Card className="w-full shadow-xl">
            <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight">Inscrição Sábado Total</CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight">Sábado Total - Na trilha da Fé</CardTitle>
             <CardDescription className="md:text-xl">
               Garanta sua vaga no nosso próximo encontro!
             </CardDescription>
@@ -127,8 +137,7 @@ export function Registration() {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Mantendo os campos do formulário original por enquanto */}
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold border-b pb-2">Dados da Criança</h3>
                   <FormField
@@ -136,16 +145,140 @@ export function Registration() {
                     name="childName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome Completo da Criança</FormLabel>
+                        <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nome completo" {...field} />
+                          <Input placeholder="Nome completo da criança" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {/* Outros campos do formulário original... */}
+                  <FormField
+                    control={form.control}
+                    name="birthDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Data de Nascimento</FormLabel>
+                        <DatePicker field={field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold border-b pb-2">Dados do Responsável</h3>
+                  <FormField
+                    control={form.control}
+                    name="guardianName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome Completo do Responsável</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome de quem preenche" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="guardianWhatsapp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone (WhatsApp) do Responsável</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(99) 99999-9999" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold border-b pb-2">Informações Adicionais</h3>
+                   <FormField
+                    control={form.control}
+                    name="ageGroup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Qual a turma do seu filho?</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione uma turma" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ageGroupOptions.map(option => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="hasDietaryRestriction"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Seu filho(a) tem alguma restrição alimentar?</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex items-center space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="sim" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Sim</FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="nao" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Não</FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {hasRestriction === "sim" && (
+                    <FormField
+                      control={form.control}
+                      name="dietaryRestrictionDetails"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Se sim, qual?</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Ex: Alergia a amendoim, intolerância à lactose..."
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+                
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Observação Importante</AlertTitle>
+                  <AlertDescription>
+                    Crianças de 2-3 anos precisam estar acompanhadas de um adulto responsável.
+                  </AlertDescription>
+                </Alert>
+
                  <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
