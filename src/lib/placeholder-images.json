@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "hero-image",
-      "description": "Children playing happily at an event.",
-      "imageUrl": "https://images.unsplash.com/photo-1760328249118-d4fb01eb119c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMGV2ZW50fGVufDB8fHx8MTc3MTk2MzE2NHww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "children event"
+      "description": "Sábado Total MCA event poster",
+      "imageUrl": "https://ik.imagekit.io/leosmc2zb/Page%20-%20S%C3%A1bado%20total%20MCA/WhatsApp%20Image%202026-02-24%20at%2016.47.30.jpeg",
+      "imageHint": "event poster"
     }
   ]
 }
