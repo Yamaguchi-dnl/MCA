@@ -26,8 +26,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IMaskInput } from "react-imask";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
+import { collection, query, where, getDocs, Timestamp, addDoc } from "firebase/firestore";
 import { parse } from "date-fns";
 
 
@@ -108,8 +108,7 @@ export function Registration() {
         return;
       }
       
-      // Use non-blocking write
-      addDocumentNonBlocking(registrationsRef, registrationData);
+      await addDoc(registrationsRef, registrationData);
 
       setIsSuccess(true);
       window.scrollTo(0, 0);
@@ -121,11 +120,7 @@ export function Registration() {
         title: "Erro Inesperado",
         description: "Não foi possível completar a inscrição. Por favor, tente mais tarde.",
       });
-    } finally {
-      // isSubmitting is set to false only on error, success leads to a new screen.
-      if (!isSuccess) {
-          setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
     }
   }
 
