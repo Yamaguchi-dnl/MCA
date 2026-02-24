@@ -58,12 +58,13 @@ export function Registration() {
   
   const hasRestriction = form.watch("hasDietaryRestriction");
   const ageGroupOptions = [
-    { value: 'Maternal', label: 'Maternal (2-3 anos)' },
-    { value: 'Jardim', label: 'Jardim (4-5 anos)' },
-    { value: 'Primários', label: 'Primários (6-9 anos)' },
-    { value: 'Juniores', label: 'Juniores (10-12 anos)' },
-    { value: 'Adolescentes I', label: 'Adolescentes I (13-15 anos)' },
-    { value: 'Adolescentes II', label: 'Adolescentes II (16-17 anos)' },
+    { value: 'Maternal', label: 'Maternal' },
+    { value: 'Jardim', label: 'Jardim' },
+    { value: 'Primários', label: 'Primários' },
+    { value: 'Juniores', label: 'Juniores' },
+    { value: 'Adolescentes I', label: 'Adolescentes I' },
+    { value: 'Adolescentes II', label: 'Adolescentes II' },
+    { value: 'Amigo', label: 'Sou um(a) amigo(a)' },
   ];
 
   async function onSubmit(data: any) {
@@ -101,7 +102,7 @@ export function Registration() {
               </div>
               <CardTitle className="text-3xl font-bold mt-4">Inscrição Realizada com Sucesso!</CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                A vaga da sua criança está garantida. Mal podemos esperar para vê-la no Sábado Total!
+                Sua vaga está garantida. Mal podemos esperar para te ver no Sábado Total!
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -150,7 +151,7 @@ export function Registration() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
             
             <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
-                <legend className="-ml-1 px-1 text-xl font-semibold">1. Dados da Criança/Adolescente</legend>
+                <legend className="-ml-1 px-1 text-xl font-semibold">1. Dados do Participante</legend>
                 <FormField
                     control={form.control}
                     name="childName"
@@ -158,7 +159,7 @@ export function Registration() {
                     <FormItem>
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                        <Input placeholder="Nome completo da criança" {...field} />
+                        <Input placeholder="Nome completo do participante" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -198,7 +199,7 @@ export function Registration() {
                         <FormControl>
                         <Input placeholder="Seu nome completo" {...field} />
                         </FormControl>
-                        <FormDescription>Pessoa que está preenchendo a ficha.</FormDescription>
+                        <FormDescription>Pessoa que está preenchendo a ficha (pode ser você mesmo).</FormDescription>
                         <FormMessage />
                     </FormItem>
                     )}
@@ -226,11 +227,11 @@ export function Registration() {
                     name="ageGroup"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Turma</FormLabel>
+                        <FormLabel>Turma / Opção</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                             <SelectTrigger>
-                            <SelectValue placeholder="Selecione a turma que seu filho(a) participará" />
+                            <SelectValue placeholder="Selecione a turma ou opção" />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -239,7 +240,7 @@ export function Registration() {
                             ))}
                         </SelectContent>
                         </Select>
-                        <FormDescription>Baseado na idade que terá no dia do evento.</FormDescription>
+                        <FormDescription>Selecione a turma da criança ou a opção "Sou um(a) amigo(a)" se for o caso.</FormDescription>
                         <FormMessage />
                     </FormItem>
                     )}
@@ -288,7 +289,7 @@ export function Registration() {
                             {...field}
                             />
                         </FormControl>
-                        <FormDescription>Esta informação é crucial para a segurança do seu filho(a).</FormDescription>
+                        <FormDescription>Esta informação é crucial para a sua segurança.</FormDescription>
                         <FormMessage />
                         </FormItem>
                     )}

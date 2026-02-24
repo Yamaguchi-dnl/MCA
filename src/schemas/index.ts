@@ -8,7 +8,7 @@ const minAgeDate = subYears(today, 18);
 const maxAgeDate = subYears(today, 2);
 
 export const registrationSchema = z.object({
-  childName: z.string().min(3, { message: "O nome completo da criança é obrigatório." }),
+  childName: z.string().min(3, { message: "O nome completo do participante é obrigatório." }),
   birthDate: z.string()
     .min(10, { message: "A data de nascimento é obrigatória e deve estar no formato DD/MM/AAAA." })
     .refine(val => {
@@ -18,13 +18,11 @@ export const registrationSchema = z.object({
     }, {
         message: "Data de nascimento inválida."
     })
-    .transform(val => parse(val, 'dd/MM/yyyy', new Date()))
-    .refine(date => isAfter(date, minAgeDate), { message: `A idade máxima é 17 anos.` })
-    .refine(date => isBefore(date, maxAgeDate), { message: `A idade mínima é 2 anos.` }),
+    .transform(val => parse(val, 'dd/MM/yyyy', new Date())),
   guardianName: z.string().min(3, { message: "O nome completo do responsável é obrigatório." }),
   guardianWhatsapp: z.string().min(10, { message: "O telefone (WhatsApp) do responsável é obrigatório." }),
   hasDietaryRestriction: z.enum(["sim", "nao"], {
-    required_error: "Informe se a criança tem alguma restrição alimentar.",
+    required_error: "Informe se há alguma restrição alimentar.",
   }),
   dietaryRestrictionDetails: z.string().optional(),
   ageGroup: z.enum([
@@ -33,19 +31,44 @@ export const registrationSchema = z.object({
     'Primários', 
     'Juniores', 
     'Adolescentes I', 
-    'Adolescentes II'
+    'Adolescentes II',
+    'Amigo'
   ], {
-    required_error: "Selecione a turma da criança.",
+    required_error: "Selecione a turma ou opção.",
   }),
-}).refine(data => {
-    if (data.hasDietaryRestriction === 'sim') {
-        return data.dietaryRestrictionDetails && data.dietaryRestrictionDetails.trim().length > 0;
+}).superRefine((data, ctx) => {
+    if (data.ageGroup !== 'Amigo') {
+        if (!data.birthDate || !isValid(data.birthDate)) {
+            // Already handled by initial validation, but good to have a check
+            return;
+        }
+        if (isAfter(data.birthDate, maxAgeDate)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `A idade mínima para as turmas é 2 anos.`,
+                path: ['birthDate'],
+            });
+        }
+        if (isBefore(data.birthDate, minAgeDate)) {
+             ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `A idade máxima para as turmas é 17 anos.`,
+                path: ['birthDate'],
+            });
+        }
     }
-    return true;
-}, {
-    message: "Por favor, especifique a restrição alimentar.",
-    path: ["dietaryRestrictionDetails"],
+
+    if (data.hasDietaryRestriction === 'sim') {
+        if (!data.dietaryRestrictionDetails || data.dietaryRestrictionDetails.trim().length === 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Por favor, especifique a restrição alimentar.",
+                path: ["dietaryRestrictionDetails"],
+            });
+        }
+    }
 });
+
 
 export type Registration = z.infer<typeof registrationSchema> & {
     id: string;
