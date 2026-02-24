@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +51,119 @@ export function DashboardClient() {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
+  const handleExportCSV = () => {
+    if (!registrations.length) return;
+
+    const headers = [
+      "ID",
+      "Nome da Criança",
+      "Data de Nascimento",
+      "Idade",
+      "Nome do Responsável",
+      "WhatsApp do Responsável",
+      "Turma",
+      "Possui Restrição Alimentar",
+      "Detalhes da Restrição",
+      "Status",
+      "Data de Inscrição",
+    ];
+
+    const csvRows = [headers.join(",")];
+
+    registrations.forEach(reg => {
+      const birthDate = reg.birthDate instanceof Date ? reg.birthDate.toLocaleDateString('pt-BR') : '';
+      const submissionDate = reg.submissionDate instanceof Date ? reg.submissionDate.toLocaleString('pt-BR') : '';
+      const age = reg.birthDate instanceof Date ? getAge(reg.birthDate as Date) : '';
+
+      const rowData = [
+        reg.id,
+        reg.childName,
+        birthDate,
+        age,
+        reg.guardianName,
+        reg.guardianWhatsapp,
+        reg.ageGroup,
+        reg.hasDietaryRestriction,
+        reg.dietaryRestrictionDetails || '',
+        reg.status,
+        submissionDate,
+      ];
+      
+      const row = rowData.map(value => {
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      }).join(',');
+
+      csvRows.push(row);
+    });
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([`\uFEFF${csvString}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "inscricoes.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportXML = () => {
+    if (!registrations.length) return;
+
+    const escapeXml = (unsafe: string | undefined) => {
+        if (typeof unsafe !== 'string') return '';
+        return unsafe.replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+            return c;
+        });
+    };
+
+    let xmlString = '<?xml version="1.0" encoding="UTF-8"?>\n<registrations>\n';
+
+    registrations.forEach(reg => {
+      const birthDate = reg.birthDate instanceof Date ? reg.birthDate.toLocaleDateString('pt-BR') : '';
+      const submissionDate = reg.submissionDate instanceof Date ? reg.submissionDate.toLocaleString('pt-BR') : '';
+      const age = reg.birthDate instanceof Date ? getAge(reg.birthDate as Date) : '';
+
+      xmlString += '  <registration>\n';
+      xmlString += `    <id>${reg.id}</id>\n`;
+      xmlString += `    <childName>${escapeXml(reg.childName)}</childName>\n`;
+      xmlString += `    <birthDate>${birthDate}</birthDate>\n`;
+      xmlString += `    <age>${age}</age>\n`;
+      xmlString += `    <guardianName>${escapeXml(reg.guardianName)}</guardianName>\n`;
+      xmlString += `    <guardianWhatsapp>${escapeXml(reg.guardianWhatsapp)}</guardianWhatsapp>\n`;
+      xmlString += `    <ageGroup>${escapeXml(reg.ageGroup)}</ageGroup>\n`;
+      xmlString += `    <hasDietaryRestriction>${escapeXml(reg.hasDietaryRestriction)}</hasDietaryRestriction>\n`;
+      xmlString += `    <dietaryRestrictionDetails>${escapeXml(reg.dietaryRestrictionDetails)}</dietaryRestrictionDetails>\n`;
+      xmlString += `    <status>${escapeXml(reg.status)}</status>\n`;
+      xmlString += `    <submissionDate>${submissionDate}</submissionDate>\n`;
+      xmlString += '  </registration>\n';
+    });
+
+    xmlString += '</registrations>';
+
+    const blob = new Blob([xmlString], { type: "application/xml;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "inscricoes.xml");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (error) {
     console.error("Firestore error:", error);
     return <p className="text-red-500 text-center">Erro ao carregar as inscrições. Por favor, tente recarregar a página.</p>;
@@ -75,13 +190,23 @@ export function DashboardClient() {
           <CardDescription>
             Uma lista de todas as crianças inscritas no evento.
           </CardDescription>
-          <div className="pt-4">
+          <div className="pt-4 flex flex-wrap justify-between items-center gap-4">
             <Input
               placeholder="Pesquisar por nome da criança ou responsável..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
+             <div className="flex gap-2">
+              <Button onClick={handleExportCSV} variant="outline" size="sm" disabled={loading || registrations.length === 0}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Exportar CSV
+              </Button>
+              <Button onClick={handleExportXML} variant="outline" size="sm" disabled={loading || registrations.length === 0}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Exportar XML
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
