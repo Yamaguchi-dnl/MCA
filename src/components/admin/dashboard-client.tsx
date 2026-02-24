@@ -69,7 +69,7 @@ export function DashboardClient() {
           </CardContent>
         </Card>
       </div>
-      <Card className="animate-in fade-in-50 delay-200 duration-500">
+      <Card className="animate-in fade-in-50 delay-200 duration-500 border-destructive">
         <CardHeader>
           <CardTitle>Inscrições Realizadas</CardTitle>
           <CardDescription>
