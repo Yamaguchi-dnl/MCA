@@ -13,7 +13,6 @@ declare global {
 
 export function Particles() {
   const initialized = useRef(false);
-  const animationFrameId = useRef<number>();
 
   const init = () => {
     if (initialized.current || !window.particlesJS) {
@@ -123,7 +122,7 @@ export function Particles() {
 
       <Script
         id="particles-js-lib"
-        src="http://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"
+        src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"
         onLoad={init}
       />
     </>
