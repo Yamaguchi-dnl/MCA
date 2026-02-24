@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CircleUser, LogOut } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -42,10 +41,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
 
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
-      <div className="md:hidden">
-        <SidebarTrigger />
-      </div>
+    <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
       <div className="w-full flex-1">
         <h1 className="text-lg font-semibold">{title}</h1>
       </div>
@@ -62,7 +58,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>{user?.displayName || "Minha Conta"}</DropdownMenuLabel>
+          <DropdownMenuLabel>{user?.displayName || user?.email || "Minha Conta"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled>Configurações</DropdownMenuItem>
           <DropdownMenuItem disabled>Suporte</DropdownMenuItem>

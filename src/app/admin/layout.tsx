@@ -3,8 +3,6 @@
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({
@@ -31,13 +29,8 @@ export default function AdminLayout({
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <AdminSidebar />
-      </Sidebar>
-      <SidebarInset>
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      {children}
+    </div>
   );
 }
