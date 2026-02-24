@@ -3,25 +3,21 @@
  *
  * ## Core Philosophy
  * This ruleset establishes a hybrid security model designed for an event registration application.
- * It provides public, read-only access to general event information while enforcing strict,
- * role-based access for sensitive registration data. Administrative users are granted
- * elevated privileges for managing events and viewing registrations.
+ * It provides public, read-only access to general event information while enforcing that only
+ * authenticated users can access sensitive registration data.
  *
  * ## Data Structure
  * 1. `/events/{eventId}`: Contains public details about an event. Readable by anyone,
- *    writable only by administrators with a specific role.
+ *    writable only by authenticated users (admins).
  * 2. `/registrations/{registrationId}`: Contains private registration information submitted
- *    publicly. Writable by anyone, but readable only by any authenticated user (admin) to protect PII.
- * 3. `/roles_admin/{adminId}`: A collection for RBAC. The existence of a document with an ID
- *    matching a user's UID grants them administrative privileges for managing events.
+ *    publicly. Writable by anyone, but readable only by any authenticated user to protect PII.
  *
  * ## Key Security Decisions
  * - **Default Deny:** All paths are closed by default.
  * - **Public Submissions, Private Reads:** The `/registrations` path allows open write access
  *   (`create`) so anyone can fill out the form. However, read/write access is restricted
  *   to authenticated users, as the admin section is already protected by login.
- * - **Admin Access:** An `isAdmin()` helper function checks for a document in `/roles_admin`,
- *   centralizing admin privilege management for non-registration data.
+ * - **Admin Access:** Any authenticated user is considered an administrator.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -35,8 +31,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    /**
+     * @description Checks if the user is authenticated. In this ruleset, any
+     *              signed-in user is considered an administrator for simplicity.
+     */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn();
     }
 
     function isExistingDoc() {
@@ -69,13 +69,12 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages administrative roles. This collection should be managed
-     *              server-side or via the Firebase Console, not by clients.
+     * @description This collection is no longer used for role management in the new rules.
+     *              Access is denied for client-side operations.
      * @path /roles_admin/{adminId}
      */
     match /roles_admin/{adminId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if false; // Prevent client-side role modification.
+      allow read, write: if false;
     }
   }
 }
