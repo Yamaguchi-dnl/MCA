@@ -25,7 +25,7 @@ export function Hero() {
       <div className="relative z-10 container mx-auto px-4 md:px-6 text-white flex flex-col items-center">
         <Logo className="h-80 w-auto" />
         <div className="flex justify-center mt-8">
-          <Button asChild size="lg" className="text-lg px-10 py-7 rounded-full font-bold shadow-lg transform transition-transform hover:scale-105">
+          <Button asChild size="lg" className="text-lg rounded-full font-bold shadow-lg transform transition-transform hover:scale-105">
             <Link href="/inscricao">FAZER INSCRIÇÃO AGORA</Link>
           </Button>
         </div>
