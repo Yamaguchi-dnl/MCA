@@ -3,10 +3,8 @@
 import { z } from "zod";
 import { registrationSchema } from "@/schemas";
 import { summarizeDietaryRestrictions } from "@/ai/flows/summarize-dietary-restrictions";
-// To fully enable Firestore, you'll need to uncomment the following lines
-// and set up your Firebase project in `src/lib/firebase.ts`.
-// import { db } from "@/lib/firebase";
-// import { collection, addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
 
 type RegistrationResult = {
   success: boolean;
@@ -22,39 +20,26 @@ export async function registerChild(
     return { success: false, error: "Dados inválidos." };
   }
   
+  const { birthDate, ...restData } = validatedFields.data;
+
   const registrationData = {
-    ...validatedFields.data,
+    ...restData,
+    birthDate: Timestamp.fromDate(birthDate),
     status: 'confirmado',
-    submissionDate: new Date(),
+    submissionDate: Timestamp.now(),
   };
 
   try {
-    // --- Firestore Integration (currently commented out) ---
-    // This is where you would check for duplicates and save the new registration.
+    const inscricoesRef = collection(db, "inscricoes");
+    const q = query(inscricoesRef, where("childName", "==", registrationData.childName));
+    const querySnapshot = await getDocs(q);
     
-    // 1. Check for duplicate registration by child's name
-    // const inscricoesRef = collection(db, "inscricoes");
-    // const q = query(inscricoesRef, where("childName", "==", registrationData.childName));
-    // const querySnapshot = await getDocs(q);
-    
-    // if (!querySnapshot.empty) {
-    //   return { success: false, error: "Esta criança já foi inscrita anteriormente." };
-    // }
+    if (!querySnapshot.empty) {
+      return { success: false, error: "Esta criança já foi inscrita anteriormente." };
+    }
 
-    // 2. Add the new registration document
-    // await addDoc(inscricoesRef, {
-    //     ...registrationData,
-    //     birthDate: Timestamp.fromDate(registrationData.birthDate),
-    //     submissionDate: Timestamp.fromDate(registrationData.submissionDate),
-    // });
+    await addDoc(inscricoesRef, registrationData);
     
-    // --- End of Firestore Integration ---
-    
-    // Simulate a network delay for demonstration purposes.
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // In a real application, the success depends on the Firestore operation above.
-    // For now, we assume it's always successful if validation passes.
     return { success: true };
 
   } catch (error) {

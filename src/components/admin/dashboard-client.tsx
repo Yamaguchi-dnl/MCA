@@ -6,18 +6,35 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { DietarySummary } from "./dietary-summary";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCollection } from 'react-firebase-hooks/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from "@/components/ui/skeleton";
 
-type DashboardClientProps = {
-  registrations: Registration[];
-};
-
-export function DashboardClient({ registrations }: DashboardClientProps) {
+export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [value, loading, error] = useCollection(
+    query(collection(db, 'inscricoes'), orderBy('submissionDate', 'desc'))
+  );
+
+  const registrations: Registration[] = useMemo(() => {
+    if (!value) return [];
+    return value.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        birthDate: data.birthDate.toDate(),
+        submissionDate: data.submissionDate.toDate(),
+      } as Registration;
+    });
+  }, [value]);
+
   const filteredRegistrations = useMemo(() => {
+    if (!registrations) return [];
     return registrations.filter(
       (reg) =>
         reg.childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,17 +49,21 @@ export function DashboardClient({ registrations }: DashboardClientProps) {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
+  if (error) {
+    return <p className="text-red-500 text-center">Erro ao carregar as inscrições. Por favor, verifique o console.</p>;
+  }
+
   return (
     <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
         <Card className="animate-in fade-in-50 duration-500">
           <CardHeader className="pb-2">
             <CardDescription>Total de Inscrições</CardDescription>
-            <CardTitle className="text-4xl">{registrations.length}</CardTitle>
+            {loading ? <Skeleton className="h-10 w-16" /> : <CardTitle className="text-4xl">{registrations.length}</CardTitle>}
           </CardHeader>
           <CardContent>
             <div className="text-xs text-muted-foreground">
-              +10% em relação ao último evento
+              Dados atualizados em tempo real
             </div>
           </CardContent>
         </Card>
@@ -76,7 +97,17 @@ export function DashboardClient({ registrations }: DashboardClientProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRegistrations.length > 0 ? (
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell className="hidden lg:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-6 w-20 rounded-full ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredRegistrations.length > 0 ? (
                   filteredRegistrations.map((reg) => (
                     <TableRow key={reg.id} className="animate-in fade-in-50">
                       <TableCell>
