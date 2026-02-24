@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { subYears, isAfter, isBefore, parse, isValid } from "date-fns";
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-const minAgeDate = subYears(today, 18);
-const maxAgeDate = subYears(today, 2);
-
 export const registrationSchema = z.object({
   childName: z.string().min(3, { message: "O nome completo do participante é obrigatório." }),
   birthDate: z.string()
@@ -37,6 +31,12 @@ export const registrationSchema = z.object({
     required_error: "Selecione a turma ou opção.",
   }),
 }).superRefine((data, ctx) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const minAgeDate = subYears(today, 18);
+    const maxAgeDate = subYears(today, 2);
+    
     if (data.ageGroup !== 'Amigo') {
         if (!data.birthDate || !isValid(data.birthDate)) {
             // Already handled by initial validation, but good to have a check
@@ -68,10 +68,3 @@ export const registrationSchema = z.object({
         }
     }
 });
-
-
-export type Registration = z.infer<typeof registrationSchema> & {
-    id: string;
-    status: 'confirmado' | 'pendente' | 'cancelado';
-    submissionDate: Date;
-};
