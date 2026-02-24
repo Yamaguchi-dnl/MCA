@@ -11,8 +11,7 @@ export const registrationSchema = z.object({
         return isValid(parsedDate) && parsedDate.getFullYear() > 1900;
     }, {
         message: "Data de nascimento inválida."
-    })
-    .transform(val => parse(val, 'dd/MM/yyyy', new Date())),
+    }),
   guardianName: z.string().min(3, { message: "O nome completo do responsável é obrigatório." }),
   guardianWhatsapp: z.string().min(10, { message: "O telefone (WhatsApp) do responsável é obrigatório." }),
   hasDietaryRestriction: z.enum(["sim", "nao"], {
@@ -38,18 +37,19 @@ export const registrationSchema = z.object({
     const maxAgeDate = subYears(today, 2);
     
     if (data.ageGroup !== 'Amigo') {
-        if (!data.birthDate || !isValid(data.birthDate)) {
+        const birthDateAsDate = parse(data.birthDate, 'dd/MM/yyyy', new Date());
+        if (!data.birthDate || !isValid(birthDateAsDate)) {
             // Already handled by initial validation, but good to have a check
             return;
         }
-        if (isAfter(data.birthDate, maxAgeDate)) {
+        if (isAfter(birthDateAsDate, maxAgeDate)) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: `A idade mínima para as turmas é 2 anos.`,
                 path: ['birthDate'],
             });
         }
-        if (isBefore(data.birthDate, minAgeDate)) {
+        if (isBefore(birthDateAsDate, minAgeDate)) {
              ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: `A idade máxima para as turmas é 17 anos.`,

@@ -28,9 +28,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { parse } from "date-fns";
 
 
-type RegistrationFormValues = z.input<typeof registrationSchema>;
+type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 const eventInfo = [
     { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
@@ -69,7 +70,7 @@ export function Registration() {
     { value: 'Amigo', label: 'Sou um(a) amigo(a)' },
   ];
 
-  async function onSubmit(data: z.output<typeof registrationSchema>) {
+  async function onSubmit(data: RegistrationFormValues) {
     setIsSubmitting(true);
 
     if (!firestore) {
@@ -84,10 +85,11 @@ export function Registration() {
 
     try {
       const { birthDate, ...restData } = data;
+      const birthDateAsDate = parse(birthDate, 'dd/MM/yyyy', new Date());
 
       const registrationData = {
         ...restData,
-        birthDate: Timestamp.fromDate(birthDate),
+        birthDate: Timestamp.fromDate(birthDateAsDate),
         status: 'confirmado',
         submissionDate: Timestamp.now(),
       };
