@@ -58,7 +58,7 @@ export function Info() {
           ))}
         </div>
         <div className="mx-auto max-w-5xl mt-12">
-            <Card className="bg-secondary/10 border-secondary shadow-md">
+            <Card className="bg-secondary/10 border-secondary/50 shadow-md">
                 <CardHeader className="flex flex-row items-center gap-4">
                      <div className="bg-secondary/10 p-3 rounded-full">
                         <supervisionNotice.icon className="h-8 w-8 text-secondary" />
@@ -68,7 +68,7 @@ export function Info() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-secondary-foreground/80">{supervisionNotice.content}</p>
+                    <p className="text-muted-foreground">{supervisionNotice.content}</p>
                 </CardContent>
             </Card>
         </div>

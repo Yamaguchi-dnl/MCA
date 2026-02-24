@@ -15,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -55,12 +56,12 @@ export function Registration() {
   
   const hasRestriction = form.watch("hasDietaryRestriction");
   const ageGroupOptions = [
-    'Maternal', 
-    'Jardim', 
-    'Primários', 
-    'Juniores', 
-    'Adolescentes I', 
-    'Adolescentes II'
+    { value: 'Maternal', label: 'Maternal (2-3 anos)' },
+    { value: 'Jardim', label: 'Jardim (4-5 anos)' },
+    { value: 'Primários', label: 'Primários (6-9 anos)' },
+    { value: 'Juniores', label: 'Juniores (10-12 anos)' },
+    { value: 'Adolescentes I', label: 'Adolescentes I (13-15 anos)' },
+    { value: 'Adolescentes II', label: 'Adolescentes II (16-17 anos)' },
   ];
 
   async function onSubmit(data: any) {
@@ -69,6 +70,7 @@ export function Registration() {
       const result = await registerChild(data);
       if (result.success) {
         setIsSuccess(true);
+        window.scrollTo(0, 0);
       } else {
         toast({
           variant: "destructive",
@@ -89,210 +91,218 @@ export function Registration() {
 
   if (isSuccess) {
     return (
-       <section id="registration" className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
-        <div className="container flex justify-center px-4 md:px-6">
-          <Card className="w-full max-w-2xl text-center shadow-lg animate-in fade-in-50 zoom-in-95">
-            <CardHeader>
-              <div className="mx-auto bg-green-100 p-4 rounded-full w-fit">
-                <PartyPopper className="h-12 w-12 text-green-600" />
+       <div className="w-full max-w-2xl text-center">
+          <Card className="w-full shadow-lg animate-in fade-in-50 zoom-in-95">
+            <CardHeader className="items-center">
+              <div className="mx-auto bg-green-100 dark:bg-green-900/50 p-4 rounded-full w-fit">
+                <PartyPopper className="h-12 w-12 text-green-600 dark:text-green-400" />
               </div>
               <CardTitle className="text-3xl font-bold mt-4">Inscrição Realizada com Sucesso!</CardTitle>
-              <CardDescription className="text-lg">
+              <CardDescription className="text-lg text-muted-foreground">
                 A vaga da sua criança está garantida. Mal podemos esperar para vê-la no Sábado Total!
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">Você receberá mais informações em breve no WhatsApp cadastrado.</p>
-              <Button asChild className="mt-6">
-                <Link href="/">Voltar ao Início</Link>
+              <Button asChild className="mt-6 font-semibold">
+                <Link href="/">Voltar para a Página Inicial</Link>
               </Button>
             </CardContent>
           </Card>
         </div>
-      </section>
     );
   }
 
   return (
-    <div className="flex flex-col items-center w-full max-w-3xl px-4">
-        <Logo className="h-60 w-auto -mb-8 relative z-10" />
-        <Card className="w-full shadow-xl">
-           <CardHeader className="text-center pt-12">
-            <CardTitle className="text-3xl font-bold tracking-tight">Sábado Total - Na trilha da Fé</CardTitle>
-            <CardDescription className="md:text-xl">
-              Garanta sua vaga no nosso próximo encontro!
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-8">
-             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4">
+    <div className="w-full max-w-3xl space-y-10">
+        <div className="text-center">
+            <Link href="/" aria-label="Voltar para a página inicial">
+                <Logo className="h-28 w-auto mx-auto" />
+            </Link>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-4">Ficha de Inscrição</h1>
+            <p className="mt-2 text-lg text-muted-foreground">
+                Preencha os dados abaixo com atenção para garantir a vaga.
+            </p>
+        </div>
+
+        <Card className="overflow-hidden shadow-sm">
+            <CardHeader className="bg-muted/50">
+                <CardTitle>Detalhes do Evento</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {eventInfo.map((item, index) => (
                     <div key={index} className="flex items-start gap-4">
-                        <item.icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                        <div className="text-sm">
-                            <span className="font-semibold">{item.label}: </span>
-                            <span>{item.value}</span>
+                        <div className="flex-shrink-0 bg-primary/10 text-primary p-3 rounded-full mt-1">
+                            <item.icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-card-foreground">{item.label}</p>
+                            <p className="text-muted-foreground">{item.value}</p>
                         </div>
                     </div>
                 ))}
-            </div>
+            </CardContent>
+        </Card>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold border-b pb-2">Dados da Criança</h3>
-                  <FormField
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+            
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+                <legend className="-ml-1 px-1 text-xl font-semibold">1. Dados da Criança/Adolescente</legend>
+                <FormField
                     control={form.control}
                     name="childName"
                     render={({ field }) => (
-                      <FormItem>
+                    <FormItem>
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nome completo da criança" {...field} />
+                        <Input placeholder="Nome completo da criança" {...field} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                  <FormField
+                />
+                <FormField
                     control={form.control}
                     name="birthDate"
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                    <FormItem className="flex flex-col">
                         <FormLabel>Data de Nascimento</FormLabel>
                         <DatePicker field={field} />
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                </div>
+                />
+            </fieldset>
 
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold border-b pb-2">Dados do Responsável</h3>
-                  <FormField
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+                <legend className="-ml-1 px-1 text-xl font-semibold">2. Dados do Responsável</legend>
+                <FormField
                     control={form.control}
                     name="guardianName"
                     render={({ field }) => (
-                      <FormItem>
+                    <FormItem>
                         <FormLabel>Nome Completo do Responsável</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nome de quem preenche" {...field} />
+                        <Input placeholder="Seu nome completo" {...field} />
                         </FormControl>
+                        <FormDescription>Pessoa que está preenchendo a ficha.</FormDescription>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                  <FormField
+                />
+                <FormField
                     control={form.control}
                     name="guardianWhatsapp"
                     render={({ field }) => (
-                      <FormItem>
+                    <FormItem>
                         <FormLabel>Telefone (WhatsApp) do Responsável</FormLabel>
                         <FormControl>
-                          <Input placeholder="(99) 99999-9999" {...field} />
+                        <Input placeholder="(99) 99999-9999" {...field} />
                         </FormControl>
+                        <FormDescription>Usaremos para enviar informações importantes sobre o evento.</FormDescription>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                </div>
+                />
+            </fieldset>
 
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold border-b pb-2">Informações Adicionais</h3>
-                   <FormField
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+                <legend className="-ml-1 px-1 text-xl font-semibold">3. Informações Adicionais</legend>
+                <FormField
                     control={form.control}
                     name="ageGroup"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Qual a turma do seu filho?</FormLabel>
+                    <FormItem>
+                        <FormLabel>Turma</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
+                        <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione uma turma" />
+                            <SelectValue placeholder="Selecione a turma que seu filho(a) participará" />
                             </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
+                        </FormControl>
+                        <SelectContent>
                             {ageGroupOptions.map(option => (
-                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                             ))}
-                          </SelectContent>
+                        </SelectContent>
                         </Select>
+                        <FormDescription>Baseado na idade que terá no dia do evento.</FormDescription>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                  <FormField
+                />
+                <FormField
                     control={form.control}
                     name="hasDietaryRestriction"
                     render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel>Seu filho(a) tem alguma restrição alimentar?</FormLabel>
+                    <FormItem className="space-y-3">
+                        <FormLabel>Possui alguma restrição alimentar ou alergia?</FormLabel>
                         <FormControl>
-                          <RadioGroup
+                        <RadioGroup
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                             className="flex items-center space-x-4"
-                          >
+                        >
                             <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl>
+                            <FormControl>
                                 <RadioGroupItem value="sim" />
-                              </FormControl>
-                              <FormLabel className="font-normal">Sim</FormLabel>
+                            </FormControl>
+                            <FormLabel className="font-normal">Sim</FormLabel>
                             </FormItem>
                             <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl>
+                            <FormControl>
                                 <RadioGroupItem value="nao" />
-                              </FormControl>
-                              <FormLabel className="font-normal">Não</FormLabel>
+                            </FormControl>
+                            <FormLabel className="font-normal">Não</FormLabel>
                             </FormItem>
-                          </RadioGroup>
+                        </RadioGroup>
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                    </FormItem>
                     )}
-                  />
-                  {hasRestriction === "sim" && (
+                />
+                {hasRestriction === "sim" && (
                     <FormField
-                      control={form.control}
-                      name="dietaryRestrictionDetails"
-                      render={({ field }) => (
+                    control={form.control}
+                    name="dietaryRestrictionDetails"
+                    render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Se sim, qual?</FormLabel>
-                          <FormControl>
+                        <FormLabel>Se sim, qual?</FormLabel>
+                        <FormControl>
                             <Textarea
-                              placeholder="Ex: Alergia a amendoim, intolerância à lactose..."
-                              className="resize-none"
-                              {...field}
+                            placeholder="Ex: Alergia a amendoim, intolerância à lactose, etc."
+                            className="resize-none"
+                            {...field}
                             />
-                          </FormControl>
-                          <FormMessage />
+                        </FormControl>
+                        <FormDescription>Esta informação é crucial para a segurança do seu filho(a).</FormDescription>
+                        <FormMessage />
                         </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-                
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Observação Importante</AlertTitle>
-                  <AlertDescription>
-                    Crianças de 2-3 anos precisam estar acompanhadas de um adulto responsável.
-                  </AlertDescription>
-                </Alert>
+                    )}
+                )}
+            </fieldset>
+            
+            <Alert variant="default" className="bg-secondary/10 border-secondary/50 text-secondary-foreground">
+                <Info className="h-4 w-4 !text-secondary" />
+                <AlertTitle className="text-secondary">Aviso Importante</AlertTitle>
+                <AlertDescription className="text-muted-foreground">
+                Crianças de 2 e 3 anos (turma Maternal) precisam estar acompanhadas por um adulto responsável durante todo o evento.
+                </AlertDescription>
+            </Alert>
 
-                 <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    "Finalizar Inscrição"
-                  )}
-                </Button>
-              </form>
-            </Form>
-        </CardContent>
-        </Card>
+            <Button type="submit" className="w-full font-bold text-lg py-7" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? (
+                <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Enviando Inscrição...
+                </>
+                ) : (
+                "FINALIZAR INSCRIÇÃO"
+                )}
+            </Button>
+            </form>
+        </Form>
     </div>
   );
 }
