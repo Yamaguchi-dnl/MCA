@@ -1,0 +1,120 @@
+/**
+ * # Firestore Security Rules
+ *
+ * ## Core Philosophy
+ * This ruleset establishes a hybrid security model designed for an event registration application.
+ * It provides public, read-only access to general event information while enforcing strict,
+ * user-centric ownership for sensitive registration data. Administrative users are granted
+ * elevated privileges for managing events and viewing registrations, governed by a role-based
+ * access control (RBAC) system.
+ *
+ * ## Data Structure
+ * The data is organized into three primary top-level collections:
+ * 1. `/events/{eventId}`: Contains public details about an event. Readable by anyone, but
+ *    writable only by administrators.
+ * 2. `/users/{userId}/registrations/{registrationId}`: A user-scoped subcollection containing
+ *    private registration information. All documents within this path are owned exclusively
+ *    by the user identified by `{userId}`.
+ * 3. `/roles_admin/{adminId}`: A collection used for RBAC. The existence of a document with an
+ *    ID matching a user's UID grants them administrative privileges across the application.
+ *
+ * ## Key Security Decisions
+ * - **Default Deny:** All paths are closed by default, and access is explicitly granted.
+ * - **Path-Based Ownership:** A user's registration data is stored at `/users/{userId}/...`.
+ *   This path-based ownership is the primary mechanism for securing user data, allowing rules
+ *   to authorize access by simply comparing the `userId` in the path with the authenticated
+ *   user's UID. This avoids costly `get()` calls.
+ * - **Admin Access:** An `isAdmin()` helper function checks for a document in `/roles_admin`.
+ *   This provides a centralized and scalable way to manage administrative privileges. Admins
+ *   can manage events and have read-only access to all registrations for oversight.
+ * - **No User Listing:** The rules do not allow for listing documents in the top-level `/users`
+ *   collection to protect user privacy.
+ * - **Prototyping Flexibility:** These rules focus strictly on authorization (who can access what)
+ *   and relational integrity. They do not validate the specific shape or data types of documents,
+ *   allowing the application schema to evolve rapidly during development.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =====================================================================
+    // Helper Functions
+    // =================================e====================================
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user is the owner of a document,
+     * based on a provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the currently authenticated user has an admin role.
+     * Admin status is determined by the existence of a document in the
+     * `/roles_admin` collection with an ID matching the user's UID.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Verifies that a document already exists in Firestore.
+     * CRITICAL: This must be used for all update and delete operations to
+     * prevent operations on non-existent paths.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    // =====================================================================
+    // Collection Rules
+    // =====================================================================
+
+    /**
+     * @description Publicly readable event information. Writes are restricted to admins.
+     * @path /events/{eventId}
+     * @allow (get) Any user, signed in or not, can read event details.
+     * @deny (create) A regular authenticated user cannot create a new event.
+     * @principle Public read with role-based writes for global configuration data.
+     */
+    match /events/{eventId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Private registration data owned by the user (guardian).
+     * @path /users/{userId}/registrations/{registrationId}
+     * @allow (create) A signed-in user can create a registration for themselves under their own user path (`/users/THEIR_OWN_UID/...`).
+     * @deny (get) A user cannot read another user's registration data.
+     * @principle Enforces strict user ownership using path-based security. Admins have read-only access for oversight via collection group queries.
+     */
+    match /users/{userId}/registrations/{registrationId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update, delete: if isOwner(userId) && isExistingDoc();
+    }
+
+    /**
+     * @description Manages administrative roles. This collection should be managed
+     *              server-side or via the Firebase Console, not by clients.
+     * @path /roles_admin/{adminId}
+     * @allow (get) An admin can check if another user is an admin.
+     * @deny (create) No user can grant themselves or others admin privileges from the client.
+     * @principle Secures the role-based access control system against client-side tampering.
+     */
+    match /roles_admin/{adminId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+  }
+}
