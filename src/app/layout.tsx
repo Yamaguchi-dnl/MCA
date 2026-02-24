@@ -14,9 +14,6 @@ const ptSans = PT_Sans({
 export const metadata: Metadata = {
   title: 'Sábado Total MCA',
   description: 'Inscrições para o Sábado Total da Mocidade Cristã da Alvorada',
-  icons: {
-    icon: 'https://ik.imagekit.io/leosmc2zb/Page%20-%20S%C3%A1bado%20total%20MCA/ChatGPT%20Image%2024%20de%20fev.%20de%202026,%2016_56_27.png',
-  },
 };
 
 export default function RootLayout({
