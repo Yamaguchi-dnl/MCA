@@ -280,6 +280,7 @@ export function Registration() {
                         <FormMessage />
                         </FormItem>
                     )}
+                    />
                 )}
             </fieldset>
             
