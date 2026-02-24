@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -119,7 +118,7 @@ export function Registration() {
     <div className="w-full max-w-3xl space-y-10">
         <div className="text-center">
             <Link href="/" aria-label="Voltar para a página inicial">
-                <Logo className="h-40 w-auto mx-auto -mb-10" />
+                <Logo className="h-48 w-auto mx-auto -mb-12" />
             </Link>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mt-4">Ficha de Inscrição</h1>
             <p className="mt-2 text-lg text-muted-foreground">
@@ -292,7 +291,6 @@ export function Registration() {
                         <FormMessage />
                         </FormItem>
                     )}
-                    />
                 )}
             </fieldset>
             
