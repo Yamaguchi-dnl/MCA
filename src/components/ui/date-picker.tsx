@@ -26,8 +26,7 @@ export function DatePicker({ field }: DatePickerProps) {
         <Button
           variant={"outline"}
           className={cn(
-            "w-full justify-start text-left font-normal",
-            !field.value && "text-muted-foreground"
+            "w-full justify-start text-left font-normal"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
