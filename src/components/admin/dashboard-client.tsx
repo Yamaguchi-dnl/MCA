@@ -35,7 +35,7 @@ export function DashboardClient({ registrations }: DashboardClientProps) {
   return (
     <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-        <Card>
+        <Card className="animate-in fade-in-50 duration-500">
           <CardHeader className="pb-2">
             <CardDescription>Total de Inscrições</CardDescription>
             <CardTitle className="text-4xl">{registrations.length}</CardTitle>
@@ -48,7 +48,7 @@ export function DashboardClient({ registrations }: DashboardClientProps) {
         </Card>
         <DietarySummary registrations={registrations} />
       </div>
-      <Card>
+      <Card className="animate-in fade-in-50 delay-200 duration-500">
         <CardHeader>
           <CardTitle>Inscrições Realizadas</CardTitle>
           <CardDescription>
@@ -78,7 +78,7 @@ export function DashboardClient({ registrations }: DashboardClientProps) {
               <TableBody>
                 {filteredRegistrations.length > 0 ? (
                   filteredRegistrations.map((reg) => (
-                    <TableRow key={reg.id}>
+                    <TableRow key={reg.id} className="animate-in fade-in-50">
                       <TableCell>
                         <div className="font-medium">{reg.childName}</div>
                         <div className="hidden text-sm text-muted-foreground md:inline">

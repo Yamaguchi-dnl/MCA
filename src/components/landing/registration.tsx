@@ -118,7 +118,7 @@ export function Registration() {
 
   return (
     <div className="w-full max-w-3xl space-y-10">
-        <div className="text-center pt-8 sm:pt-4">
+        <div className="text-center pt-8 sm:pt-4 animate-in fade-in-50 duration-700">
             <Link href="/" aria-label="Voltar para a página inicial">
                 <Logo className="h-72 w-auto mx-auto -mb-16" />
             </Link>
@@ -128,7 +128,7 @@ export function Registration() {
             </p>
         </div>
 
-        <Card className="overflow-hidden shadow-sm">
+        <Card className="overflow-hidden shadow-sm animate-in fade-in-50 delay-100 duration-700">
             <CardHeader className="bg-muted/50">
                 <CardTitle>Detalhes do Evento</CardTitle>
             </CardHeader>
@@ -150,7 +150,7 @@ export function Registration() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
             
-            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card animate-in fade-in-50 delay-200 duration-700">
                 <legend className="-ml-1 px-1 text-xl font-semibold">1. Dados do Participante</legend>
                 <FormField
                     control={form.control}
@@ -188,7 +188,7 @@ export function Registration() {
                 />
             </fieldset>
 
-            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card animate-in fade-in-50 delay-300 duration-700">
                 <legend className="-ml-1 px-1 text-xl font-semibold">2. Dados do Responsável</legend>
                 <FormField
                     control={form.control}
@@ -220,7 +220,7 @@ export function Registration() {
                 />
             </fieldset>
 
-            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card">
+            <fieldset className="space-y-6 rounded-lg border p-6 shadow-sm bg-card animate-in fade-in-50 delay-400 duration-700">
                 <legend className="-ml-1 px-1 text-xl font-semibold">3. Informações Adicionais</legend>
                 <FormField
                     control={form.control}
@@ -297,7 +297,7 @@ export function Registration() {
                 )}
             </fieldset>
             
-            <Alert variant="default" className="bg-secondary/10 border-secondary/50 text-secondary-foreground">
+            <Alert variant="default" className="bg-secondary/10 border-secondary/50 text-secondary-foreground animate-in fade-in-50 delay-500 duration-700">
                 <Info className="h-4 w-4 !text-secondary" />
                 <AlertTitle className="text-secondary">Aviso Importante</AlertTitle>
                 <AlertDescription className="text-muted-foreground">
@@ -305,7 +305,7 @@ export function Registration() {
                 </AlertDescription>
             </Alert>
 
-            <Button type="submit" className="w-full font-bold text-lg py-7" size="lg" disabled={isSubmitting}>
+            <Button type="submit" className="w-full font-bold text-lg py-7 animate-in fade-in-50 delay-600 duration-700" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? (
                 <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />

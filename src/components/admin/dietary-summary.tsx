@@ -63,7 +63,7 @@ export function DietarySummary({ registrations }: DietarySummaryProps) {
 
   return (
     <>
-      <Card>
+      <Card className="animate-in fade-in-50 delay-100 duration-500">
         <CardHeader className="pb-2">
             <CardDescription>Resumo Alimentar (IA)</CardDescription>
             <CardTitle className="text-4xl">{restrictionCount}</CardTitle>
