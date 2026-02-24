@@ -49,7 +49,7 @@ export function Particles() {
         },
         move: {
           enable: true,
-          speed: 2,
+          speed: 0.5,
           direction: "none",
           random: false,
           straight: false,
