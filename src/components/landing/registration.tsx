@@ -34,7 +34,7 @@ import { parse } from "date-fns";
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
-const PIX_KEY = "41987654321";
+const PIX_KEY = "mcabarreirinha@gmail.com";
 const WHATSAPP_NUMBER = "5541987654321";
 
 const eventInfo = [
@@ -357,7 +357,7 @@ export function Registration() {
           <div className="space-y-4 text-sm">
               <div className="font-semibold">Valor: R$ 10,00</div>
               <div>
-                <div className="font-semibold">Chave PIX (Telefone):</div>
+                <div className="font-semibold">Chave PIX (E-mail):</div>
                 <div className="flex items-center justify-between mt-1 p-2 rounded-md bg-muted">
                     <span className="text-muted-foreground">{PIX_KEY}</span>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyToClipboard}>
