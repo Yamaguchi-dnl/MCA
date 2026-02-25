@@ -61,18 +61,19 @@ export function DashboardClient() {
     const registrationRef = doc(firestore, 'registrations', registrationId);
     try {
       await updateDoc(registrationRef, {
-        paymentStatus: isPaid ? 'paid' : 'pending_payment'
+        paymentStatus: isPaid ? 'paid' : 'pending_payment',
+        status: isPaid ? 'confirmado' : 'pendente',
       });
       toast({
-        title: "Status do pagamento atualizado!",
-        description: `O status foi alterado para ${isPaid ? 'Pago' : 'Pendente'}.`
+        title: "Status da inscrição atualizado!",
+        description: `A inscrição foi marcada como ${isPaid ? 'confirmada' : 'pendente'}.`,
       });
     } catch (error) {
       console.error("Error updating payment status: ", error);
       toast({
         variant: "destructive",
         title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o status do pagamento.",
+        description: "Não foi possível atualizar o status da inscrição.",
       });
     }
   };
