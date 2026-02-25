@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -74,6 +74,14 @@ export function Registration() {
     { value: 'Adolescentes II', label: 'Adolescentes II' },
     { value: 'Amigo', label: 'Sou um(a) amigo(a)' },
   ];
+
+  const whatsAppLink = useMemo(() => {
+    if (!successfulRegistration) {
+      return `https://wa.me/${WHATSAPP_NUMBER}`;
+    }
+    const message = `Olá! Estou enviando o comprovante do PIX para a inscrição de ${successfulRegistration.childName} (ID: ${successfulRegistration.id})`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  }, [successfulRegistration]);
 
   async function onSubmit(data: RegistrationFormValues) {
     setIsSubmitting(true);
@@ -373,8 +381,8 @@ export function Registration() {
               <Link href="/">Voltar ao Início</Link>
             </Button>
             <Button asChild>
-              <Link 
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Estou%20enviando%20o%20comprovante%20do%20PIX%20para%20a%20inscri%C3%A7%C3%A3o%20de%20${encodeURIComponent(successfulRegistration?.childName || '')}%20(ID:%20${successfulRegistration?.id})`}
+              <Link
+                href={whatsAppLink}
                 target="_blank"
                 className="gap-2"
               >
