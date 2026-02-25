@@ -101,12 +101,19 @@ export function Registration() {
       setIsSuccess(true);
       window.scrollTo(0, 0);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during registration:", error);
+      let errorMessage = "Não foi possível completar a inscrição. Por favor, tente mais tarde.";
+      if (error.code === 'permission-denied') {
+        errorMessage = "Ocorreu um erro de permissão. Verifique se o domínio do seu site está autorizado no Firebase.";
+      } else if (error.message) {
+        errorMessage = `Ocorreu um erro: ${error.message}`;
+      }
+
       toast({
         variant: "destructive",
-        title: "Erro Inesperado",
-        description: "Não foi possível completar a inscrição. Por favor, tente mais tarde.",
+        title: "Erro na Inscrição",
+        description: errorMessage,
       });
       setIsSubmitting(false);
     }
