@@ -35,7 +35,7 @@ import { parse } from "date-fns";
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 const PIX_KEY = "mcabarreirinha@gmail.com";
-const WHATSAPP_NUMBER = "5541987654321";
+const WHATSAPP_NUMBER = "5541998675062";
 
 const eventInfo = [
     { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
@@ -366,7 +366,7 @@ export function Registration() {
                     </Button>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Após o pagamento, clique no botão abaixo para enviar o comprovante pelo WhatsApp e confirmar sua inscrição.</p>
+              <p className="text-xs text-muted-foreground">Após o pagamento, clique no botão abaixo para enviar o comprovante para a Hanna pelo WhatsApp e confirmar sua inscrição.</p>
           </div>
           <AlertDialogFooter>
             <Button variant="outline" asChild>
