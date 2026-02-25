@@ -4,7 +4,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Event",
       "type": "object",
-      "description": "Represents the fixed details and configuration for the Sábado Total MCA event.",
+      "description": "Represents the fixed details and configuration for the Sábado Total event of Igreja Adventista da Promessa in Barreirinha.",
       "properties": {
         "id": {
           "type": "string",
@@ -12,7 +12,7 @@
         },
         "name": {
           "type": "string",
-          "description": "The official name of the Sábado Total MCA event."
+          "description": "The official name of the Sábado Total event."
         },
         "date": {
           "type": "string",
@@ -60,7 +60,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Registration",
       "type": "object",
-      "description": "Stores all details pertaining to a child's registration for the Sábado Total MCA event, including guardian and health information.",
+      "description": "Stores all details pertaining to a child's registration for the Sábado Total event of Igreja Adventista da Promessa in Barreirinha, including guardian and health information.",
       "properties": {
         "id": {
           "type": "string",
@@ -138,7 +138,7 @@
         "schema": {
           "$ref": "#/entities/Event"
         },
-        "description": "Stores fixed details and configuration for specific events (e.g., 'sabadototalmca'). This collection is publicly readable by all users. Administrative users have privileges to create and update these documents."
+        "description": "Stores fixed details and configuration for specific events (e.g., 'sabado-total-barreirinha'). This collection is publicly readable by all users. Administrative users have privileges to create and update these documents."
       },
       "registrations": {
         "schema": {
