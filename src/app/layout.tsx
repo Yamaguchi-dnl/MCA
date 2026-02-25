@@ -11,8 +11,8 @@ const ptSans = PT_Sans({
   variable: '--font-sans',
 });
 
-const pageTitle = 'Sábado Total MCA | Faça sua Inscrição!';
-const pageDescription = 'Inscrições para o Sábado Total da Mocidade Cristã de Barreirinha. Vagas limitadas!';
+const pageTitle = 'Sábado Total | Igreja Adventista da Promessa Barreirinha';
+const pageDescription = 'Inscrições para o Sábado Total, evento da Igreja Adventista da Promessa em Barreirinha. Vagas limitadas!';
 const pageImage = 'https://ik.imagekit.io/leosmc2zb/Page%20-%20S%C3%A1bado%20total%20MCA/WhatsApp%20Image%202026-02-24%20at%2016.47.30.jpeg';
 
 
