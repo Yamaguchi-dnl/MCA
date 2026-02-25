@@ -24,9 +24,9 @@ export function Hero() {
       </div>
       <div className="relative z-10 container mx-auto px-4 md:px-6 text-white flex flex-col items-center">
         <div className="animate-in fade-in zoom-in-95 duration-1000 ease-out">
-          <Logo className="w-72 h-auto sm:h-80 sm:w-auto -mb-8" />
+          <Logo className="w-96 h-auto sm:h-80 sm:w-auto -mb-4 sm:-mb-8" />
         </div>
-        <div className="flex justify-center -mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out delay-200">
+        <div className="flex justify-center mt-2 sm:-mt-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out delay-200">
           <Button asChild className="h-10 px-6 text-base sm:h-11 sm:px-8 sm:text-lg rounded-full font-bold shadow-lg transform transition-transform hover:scale-105">
             <Link href="/inscricao">FAZER INSCRIÇÃO AGORA</Link>
           </Button>
