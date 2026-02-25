@@ -11,9 +11,27 @@ const ptSans = PT_Sans({
   variable: '--font-sans',
 });
 
+const pageTitle = 'Sábado Total MCA | Faça sua Inscrição!';
+const pageDescription = 'Inscrições para o Sábado Total da Mocidade Cristã de Barreirinha. Vagas limitadas!';
+const pageImage = 'https://ik.imagekit.io/leosmc2zb/Page%20-%20S%C3%A1bado%20total%20MCA/WhatsApp%20Image%202026-02-24%20at%2016.47.30.jpeg';
+
+
 export const metadata: Metadata = {
-  title: 'Sábado Total MCA',
-  description: 'Inscrições para o Sábado Total da Mocidade Cristã da Alvorada',
+  title: pageTitle,
+  description: pageDescription,
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    images: [pageImage],
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: pageTitle,
+    description: pageDescription,
+    images: [pageImage],
+  },
 };
 
 export default function RootLayout({
