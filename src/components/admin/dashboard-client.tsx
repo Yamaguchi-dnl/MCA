@@ -8,14 +8,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { FileDown, AlertTriangle, MessageSquare } from "lucide-react";
+import { FileDown, AlertTriangle, MessageSquare, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,6 +85,25 @@ export function DashboardClient() {
         variant: "destructive",
         title: "Erro ao atualizar",
         description: "Não foi possível atualizar o status da inscrição.",
+      });
+    }
+  };
+
+  const handleDeleteRegistration = async (registrationId: string, childName: string) => {
+    if (!firestore) return;
+    const registrationRef = doc(firestore, 'registrations', registrationId);
+    try {
+      await deleteDoc(registrationRef);
+      toast({
+        title: "Inscrição Excluída!",
+        description: `A inscrição de ${childName} foi removida com sucesso.`,
+      });
+    } catch (error) {
+      console.error("Error deleting registration: ", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao Excluir",
+        description: "Ocorreu um erro ao tentar excluir a inscrição.",
       });
     }
   };
@@ -277,6 +307,7 @@ export function DashboardClient() {
                   <TableHead className="hidden lg:table-cell">Inscrição</TableHead>
                   <TableHead>Pagamento</TableHead>
                   <TableHead className="text-center">Validar Pgto.</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -289,6 +320,7 @@ export function DashboardClient() {
                       <TableCell className="hidden lg:table-cell"><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                       <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
                       <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded-sm" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : filteredRegistrations.length > 0 ? (
@@ -361,11 +393,45 @@ export function DashboardClient() {
                           aria-label="Validar pagamento"
                         />
                       </TableCell>
+                      <TableCell className="text-right">
+                        <AlertDialog>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Excluir</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Excluir Inscrição</p></TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Essa ação não pode ser desfeita. Isso excluirá permanentemente a inscrição de <span className="font-semibold">{reg.childName}</span> do banco de dados.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteRegistration(reg.id, reg.childName)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Sim, excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                       Nenhuma inscrição encontrada.
                     </TableCell>
                   </TableRow>
