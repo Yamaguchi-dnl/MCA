@@ -8,15 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const registrationsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -51,6 +54,28 @@ export function DashboardClient() {
     const ageDate = new Date(diff);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
+
+  const handlePaymentStatusChange = async (registrationId: string, isPaid: boolean) => {
+    if (!firestore) return;
+    const registrationRef = doc(firestore, 'registrations', registrationId);
+    try {
+      await updateDoc(registrationRef, {
+        paymentStatus: isPaid ? 'paid' : 'pending_payment'
+      });
+      toast({
+        title: "Status do pagamento atualizado!",
+        description: `O status foi alterado para ${isPaid ? 'Pago' : 'Pendente'}.`
+      });
+    } catch (error) {
+      console.error("Error updating payment status: ", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o status do pagamento.",
+      });
+    }
+  };
+
 
   const handleExportCSV = () => {
     if (!registrations.length) return;
@@ -248,7 +273,8 @@ export function DashboardClient() {
                   <TableHead className="hidden sm:table-cell">Responsável</TableHead>
                   <TableHead className="hidden md:table-cell">Turma</TableHead>
                   <TableHead className="hidden lg:table-cell">Inscrição</TableHead>
-                  <TableHead className="text-right">Pagamento</TableHead>
+                  <TableHead>Pagamento</TableHead>
+                  <TableHead className="text-center">Validar Pgto.</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -259,7 +285,8 @@ export function DashboardClient() {
                       <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell className="hidden lg:table-cell"><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-6 w-20 rounded-full ml-auto" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded-sm" /></TableCell>
                     </TableRow>
                   ))
                 ) : filteredRegistrations.length > 0 ? (
@@ -281,16 +308,26 @@ export function DashboardClient() {
                           {reg.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell>
                         <Badge variant="default" className={cn("text-white", getPaymentStatusVariant(reg.paymentStatus))}>
                           {reg.paymentStatus === 'paid' ? 'Pago' : reg.paymentStatus === 'waived' ? 'Isento' : 'Pendente'}
                         </Badge>
+                      </TableCell>
+                       <TableCell className="text-center">
+                        <Checkbox
+                          checked={reg.paymentStatus === 'paid'}
+                          onCheckedChange={(checked) => {
+                            handlePaymentStatusChange(reg.id, !!checked);
+                          }}
+                          disabled={reg.paymentStatus === 'waived'}
+                          aria-label="Validar pagamento"
+                        />
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       Nenhuma inscrição encontrada.
                     </TableCell>
                   </TableRow>
