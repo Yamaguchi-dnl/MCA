@@ -41,7 +41,8 @@ const eventInfo = [
     { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
     { icon: MapPin, label: 'Local', value: 'Igreja Adventista da Promessa da Barreirinha - Rua Flávio Dallegrave, 9745' },
     { icon: DollarSign, label: 'Valor', value: 'R$ 10,00 por participante' },
-    { icon: Users, label: 'Faixa Etária', value: '2-17 anos' }
+    { icon: Users, label: 'Faixa Etária', value: '2-17 anos' },
+    { icon: Copy, label: 'Chave PIX (E-mail)', value: PIX_KEY }
 ];
 
 export function Registration() {
