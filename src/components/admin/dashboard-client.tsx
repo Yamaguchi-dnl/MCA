@@ -11,10 +11,11 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, AlertTriangle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -293,14 +294,50 @@ export function DashboardClient() {
                   filteredRegistrations.map((reg) => (
                     <TableRow key={reg.id} className="animate-in fade-in-50">
                       <TableCell>
-                        <div className="font-medium">{reg.childName}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {reg.childName}
+                          {reg.hasDietaryRestriction === 'sim' && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="font-semibold">Restrição Alimentar:</p>
+                                  <p>{reg.dietaryRestrictionDetails}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                         <div className="hidden text-sm text-muted-foreground md:inline">
                           {getAge(reg.birthDate as Date)} anos
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
                         <div className="font-medium">{reg.guardianName}</div>
-                        <div className="text-sm text-muted-foreground">{reg.guardianWhatsapp}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <span>{reg.guardianWhatsapp}</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <a
+                                  href={`https://wa.me/${reg.guardianWhatsapp.replace(/\D/g, '')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-muted-foreground hover:text-foreground"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                  <span className="sr-only">Chamar no WhatsApp</span>
+                                </a>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Chamar no WhatsApp</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{reg.ageGroup}</TableCell>
                        <TableCell className="hidden lg:table-cell">
