@@ -103,17 +103,22 @@ export function Registration() {
 
     } catch (error: any) {
       console.error("Error during registration:", error);
+      let errorTitle = "Erro na Inscrição";
       let errorMessage = "Não foi possível completar a inscrição. Por favor, tente mais tarde.";
+
       if (error.code === 'permission-denied') {
-        errorMessage = "Ocorreu um erro de permissão. Verifique se o domínio do seu site está autorizado no Firebase.";
+        errorTitle = "Erro de Permissão";
+        const domain = window.location.hostname;
+        errorMessage = `A comunicação com o banco de dados foi bloqueada. CAUSA PROVÁVEL: O domínio do seu site (${domain}) não está na lista de "domínios autorizados" do seu projeto Firebase. Adicione este domínio no Firebase Console > Authentication > Settings > Authorized domains.`;
       } else if (error.message) {
-        errorMessage = `Ocorreu um erro: ${error.message}`;
+        errorMessage = `Ocorreu um erro inesperado: ${error.message}`;
       }
 
       toast({
         variant: "destructive",
-        title: "Erro na Inscrição",
+        title: errorTitle,
         description: errorMessage,
+        duration: 9000,
       });
       setIsSubmitting(false);
     }
@@ -347,3 +352,5 @@ export function Registration() {
     </div>
   );
 }
+
+    
