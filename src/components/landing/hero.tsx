@@ -24,7 +24,7 @@ export function Hero() {
       </div>
       <div className="relative z-10 container mx-auto px-4 md:px-6 text-white flex flex-col items-center">
         <div className="animate-in fade-in zoom-in-95 duration-1000 ease-out">
-          <Logo className="h-80 w-auto -mb-8" />
+          <Logo className="w-72 h-auto sm:h-80 sm:w-auto -mb-8" />
         </div>
         <div className="flex justify-center -mt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-out delay-200">
           <Button asChild size="lg" className="text-lg rounded-full font-bold shadow-lg transform transition-transform hover:scale-105">
