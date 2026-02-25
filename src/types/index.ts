@@ -10,5 +10,6 @@ export type Registration = Omit<RegistrationSchema, 'birthDate'> & {
   id: string;
   birthDate: Date | Timestamp;
   status: 'confirmado' | 'pendente' | 'cancelado';
+  paymentStatus: 'pending_payment' | 'paid' | 'waived';
   submissionDate: Date | Timestamp;
 };

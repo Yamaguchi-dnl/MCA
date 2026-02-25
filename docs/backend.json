@@ -102,7 +102,16 @@
         },
         "status": {
           "type": "string",
-          "description": "The current processing status of the registration (e.g., 'pending', 'confirmado', 'cancelado')."
+          "description": "The current processing status of the registration (e.g., 'pendente', 'confirmado', 'cancelado')."
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The payment status of the registration.",
+          "enum": [
+            "pending_payment",
+            "paid",
+            "waived"
+          ]
         }
       },
       "required": [
@@ -113,7 +122,8 @@
         "guardianWhatsapp",
         "hasDietaryRestriction",
         "submissionDate",
-        "status"
+        "status",
+        "paymentStatus"
       ]
     }
   },

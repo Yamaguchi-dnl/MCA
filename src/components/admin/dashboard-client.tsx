@@ -12,6 +12,7 @@ import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function DashboardClient() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,7 +65,8 @@ export function DashboardClient() {
       "Turma",
       "Possui Restrição Alimentar",
       "Detalhes da Restrição",
-      "Status",
+      "Status Inscrição",
+      "Status Pagamento",
       "Data de Inscrição",
     ];
 
@@ -86,6 +88,7 @@ export function DashboardClient() {
         reg.hasDietaryRestriction,
         reg.dietaryRestrictionDetails || '',
         reg.status,
+        reg.paymentStatus,
         submissionDate,
       ];
       
@@ -147,6 +150,7 @@ export function DashboardClient() {
       xmlString += `    <hasDietaryRestriction>${escapeXml(reg.hasDietaryRestriction)}</hasDietaryRestriction>\n`;
       xmlString += `    <dietaryRestrictionDetails>${escapeXml(reg.dietaryRestrictionDetails)}</dietaryRestrictionDetails>\n`;
       xmlString += `    <status>${escapeXml(reg.status)}</status>\n`;
+      xmlString += `    <paymentStatus>${escapeXml(reg.paymentStatus)}</paymentStatus>\n`;
       xmlString += `    <submissionDate>${submissionDate}</submissionDate>\n`;
       xmlString += '  </registration>\n';
     });
@@ -163,6 +167,32 @@ export function DashboardClient() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const getStatusVariant = (status: Registration['status']) => {
+    switch (status) {
+      case 'confirmado':
+        return 'bg-green-600';
+      case 'pendente':
+        return 'bg-yellow-500';
+      case 'cancelado':
+        return 'bg-red-600';
+      default:
+        return 'bg-gray-500';
+    }
+  }
+
+  const getPaymentStatusVariant = (status: Registration['paymentStatus']) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-600';
+      case 'pending_payment':
+        return 'bg-yellow-500';
+      case 'waived':
+        return 'bg-blue-500';
+      default:
+        return 'bg-gray-500';
+    }
+  }
 
   if (error) {
     console.error("Firestore error:", error);
@@ -184,7 +214,7 @@ export function DashboardClient() {
           </CardContent>
         </Card>
       </div>
-      <Card className="animate-in fade-in-50 delay-200 duration-500 border-destructive">
+      <Card className="animate-in fade-in-50 delay-200 duration-500">
         <CardHeader>
           <CardTitle>Inscrições Realizadas</CardTitle>
           <CardDescription>
@@ -217,8 +247,8 @@ export function DashboardClient() {
                   <TableHead>Criança</TableHead>
                   <TableHead className="hidden sm:table-cell">Responsável</TableHead>
                   <TableHead className="hidden md:table-cell">Turma</TableHead>
-                  <TableHead className="hidden lg:table-cell">Restrições</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
+                  <TableHead className="hidden lg:table-cell">Inscrição</TableHead>
+                  <TableHead className="text-right">Pagamento</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -228,7 +258,7 @@ export function DashboardClient() {
                       <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                      <TableCell className="hidden lg:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                      <TableCell className="hidden lg:table-cell"><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-6 w-20 rounded-full ml-auto" /></TableCell>
                     </TableRow>
                   ))
@@ -246,12 +276,14 @@ export function DashboardClient() {
                         <div className="text-sm text-muted-foreground">{reg.guardianWhatsapp}</div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{reg.ageGroup}</TableCell>
-                       <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-                        {reg.hasDietaryRestriction === 'sim' ? reg.dietaryRestrictionDetails : 'N/A'}
+                       <TableCell className="hidden lg:table-cell">
+                        <Badge variant="default" className={cn("text-white", getStatusVariant(reg.status))}>
+                          {reg.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={reg.status === 'confirmado' ? 'default' : 'destructive'} className="bg-green-600 text-white">
-                          {reg.status}
+                        <Badge variant="default" className={cn("text-white", getPaymentStatusVariant(reg.paymentStatus))}>
+                          {reg.paymentStatus === 'paid' ? 'Pago' : reg.paymentStatus === 'waived' ? 'Isento' : 'Pendente'}
                         </Badge>
                       </TableCell>
                     </TableRow>

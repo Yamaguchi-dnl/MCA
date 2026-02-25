@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, PartyPopper, CalendarDays, MapPin, DollarSign, Users, Info } from "lucide-react";
+import { Loader2, CalendarDays, MapPin, DollarSign, Users, Info, Send, Copy } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IMaskInput } from "react-imask";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { useFirestore } from "@/firebase";
 import { collection, Timestamp, addDoc } from "firebase/firestore";
 import { parse } from "date-fns";
@@ -33,16 +34,20 @@ import { parse } from "date-fns";
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
+const PIX_KEY = "41987654321";
+const WHATSAPP_NUMBER = "5541987654321";
+
 const eventInfo = [
     { icon: CalendarDays, label: 'Data e Horário', value: '14/03 - logo após o culto até as 17h' },
     { icon: MapPin, label: 'Local', value: 'Igreja Adventista da Promessa da Barreirinha - Rua Flávio Dallegrave, 9745' },
-    { icon: DollarSign, label: 'Valor', value: 'Gratuito' },
+    { icon: DollarSign, label: 'Valor', value: 'R$ 10,00 por participante' },
     { icon: Users, label: 'Faixa Etária', value: '2-17 anos' }
 ];
 
 export function Registration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [successfulRegistration, setSuccessfulRegistration] = useState<{ id: string; childName: string } | null>(null);
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -90,14 +95,16 @@ export function Registration() {
       const registrationData = {
         ...restData,
         birthDate: Timestamp.fromDate(birthDateAsDate),
-        status: 'confirmado',
+        status: 'pendente',
+        paymentStatus: 'pending_payment',
         submissionDate: Timestamp.now(),
       };
       
       const registrationsRef = collection(firestore, "registrations");
       
-      await addDoc(registrationsRef, registrationData);
+      const docRef = await addDoc(registrationsRef, registrationData);
 
+      setSuccessfulRegistration({ id: docRef.id, childName: data.childName });
       setIsSuccess(true);
       window.scrollTo(0, 0);
 
@@ -120,35 +127,20 @@ export function Registration() {
         description: errorMessage,
         duration: 9000,
       });
-      setIsSubmitting(false);
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
-  if (isSuccess) {
-    return (
-       <div className="w-full max-w-2xl text-center">
-          <Card className="w-full shadow-lg animate-in fade-in-50 zoom-in-95">
-            <CardHeader className="items-center">
-              <div className="mx-auto bg-green-100 dark:bg-green-900/50 p-4 rounded-full w-fit">
-                <PartyPopper className="h-12 w-12 text-green-600 dark:text-green-400" />
-              </div>
-              <CardTitle className="text-3xl font-bold mt-4">Inscrição Realizada com Sucesso!</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
-                Sua vaga está garantida. Mal podemos esperar para te ver no Sábado Total!
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Você receberá mais informações em breve no WhatsApp cadastrado.</p>
-              <Button asChild className="mt-6 font-semibold">
-                <Link href="/">Voltar para a Página Inicial</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-    );
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(PIX_KEY);
+    toast({
+        title: "Chave PIX copiada!",
+        description: "A chave foi copiada para sua área de transferência.",
+    });
   }
 
-  return (
+  const registrationForm = (
     <div className="w-full max-w-3xl space-y-10">
         <div className="text-center pt-8 sm:pt-4 animate-in fade-in-50 duration-700">
             <Link href="/" aria-label="Voltar para a página inicial">
@@ -351,6 +343,50 @@ export function Registration() {
         </Form>
     </div>
   );
-}
 
-    
+  return (
+    <>
+      <AlertDialog open={isSuccess}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inscrição Quase Completa!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sua pré-inscrição foi realizada! Para garantir a vaga, faça o pagamento de R$ 10,00 via PIX e nos envie o comprovante.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 text-sm">
+              <div className="font-semibold">Valor: R$ 10,00</div>
+              <div>
+                <div className="font-semibold">Chave PIX (Telefone):</div>
+                <div className="flex items-center justify-between mt-1 p-2 rounded-md bg-muted">
+                    <span className="text-muted-foreground">{PIX_KEY}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyToClipboard}>
+                        <Copy className="h-4 w-4" />
+                        <span className="sr-only">Copiar chave PIX</span>
+                    </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Após o pagamento, clique no botão abaixo para enviar o comprovante pelo WhatsApp e confirmar sua inscrição.</p>
+          </div>
+          <AlertDialogFooter>
+            <Button variant="outline" asChild>
+              <Link href="/">Voltar ao Início</Link>
+            </Button>
+            <Button asChild>
+              <Link 
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Estou%20enviando%20o%20comprovante%20do%20PIX%20para%20a%20inscri%C3%A7%C3%A3o%20de%20${encodeURIComponent(successfulRegistration?.childName || '')}%20(ID:%20${successfulRegistration?.id})`}
+                target="_blank"
+                className="gap-2"
+              >
+                  <Send className="h-4 w-4" />
+                  Enviar Comprovante
+              </Link>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {!isSuccess && registrationForm}
+    </>
+  );
+}
